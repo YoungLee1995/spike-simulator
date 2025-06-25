@@ -1,0 +1,57 @@
+BFD header file version (GNU Binutils) 2.44
+elf64-littleriscv
+ (header little endian, data little endian)
+  riscv
+elf32-littleriscv
+ (header little endian, data little endian)
+  riscv
+elf32-bigriscv
+ (header big endian, data big endian)
+  riscv
+elf64-bigriscv
+ (header big endian, data big endian)
+  riscv
+pei-riscv64-little
+ (header little endian, data little endian)
+  riscv
+elf64-little
+ (header little endian, data little endian)
+  riscv
+elf64-big
+ (header big endian, data big endian)
+  riscv
+elf32-little
+ (header little endian, data little endian)
+  riscv
+elf32-big
+ (header big endian, data big endian)
+  riscv
+srec
+ (header endianness unknown, data endianness unknown)
+  riscv
+symbolsrec
+ (header endianness unknown, data endianness unknown)
+  riscv
+verilog
+ (header endianness unknown, data endianness unknown)
+  riscv
+tekhex
+ (header endianness unknown, data endianness unknown)
+  riscv
+binary
+ (header endianness unknown, data endianness unknown)
+  riscv
+ihex
+ (header endianness unknown, data endianness unknown)
+  riscv
+plugin
+ (header little endian, data little endian)
+
+         elf64-littleriscv elf32-littleriscv elf32-bigriscv elf64-bigriscv 
+   riscv elf64-littleriscv elf32-littleriscv elf32-bigriscv elf64-bigriscv
+
+         pei-riscv64-little elf64-little elf64-big elf32-little elf32-big srec 
+   riscv pei-riscv64-little elf64-little elf64-big elf32-little elf32-big srec
+
+         symbolsrec verilog tekhex binary ihex plugin 
+   riscv symbolsrec verilog tekhex binary ihex ------
