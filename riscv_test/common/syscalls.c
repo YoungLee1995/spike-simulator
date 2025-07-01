@@ -1,5 +1,5 @@
 // #include "../../riscv-isa-sim/smart/sm_regs.h"
-// #include "fp16_fp32_func.h"
+#include "fp16_fp32_func.h"
 #include "util.h"
 #include <limits.h>
 #include <stdint.h>
@@ -210,60 +210,228 @@ static unsigned long long getuint(va_list *ap, int lflag)
     return value;
 }
 
-static void vprintfmt(void (*punch)(int, void **), void **putdat, const char *fmt, va_list ap)
+static long long getint(va_list *ap, int lflag)
 {
-    int lflag = 0; // length flag
-    int width = 0; // field width
-    int pad = 0;   // padding character
-    while (*fmt)
+    long long value;
+    if (lflag & 1) // long
+        value = va_arg(*ap, long);
+    else if (lflag & 2) // long long
+        value = va_arg(*ap, long long);
+    else if (lflag & 4) // int
+        value = va_arg(*ap, int);
+    else // default is int
+        value = va_arg(*ap, int);
+    return value;
+}
+
+static void vprintfmt(void (*putch)(int, void **), void **putdat, const char *fmt, va_list ap)
+{
+    register const char *p;
+    const char *last_fmt;
+    register int ch, err;
+    unsigned long long num;
+    int base, lflag, width, precision, altflag;
+    char padc;
+
+    while (1)
     {
-        if (*fmt == '%')
+        while ((ch = *(unsigned char *)fmt) != '%')
         {
+            if (ch == '\0')
+                return; // End of format string
             fmt++;
-            if (*fmt == '0')
-            {
-                pad = 1;
-                fmt++;
-            }
-            else
-            {
-                pad = 0;
-            }
-
-            if (*fmt >= '1' && *fmt <= '9')
-            {
-                width = 0;
-                while (*fmt >= '0' && *fmt <= '9')
-                    width = width * 10 + (*(fmt++) - '0');
-            }
-            else
-            {
-                width = 0;
-            }
-
-            switch (*fmt)
-            {
-            case 'd':
-            case 'u':
-                printnum(punch, putdat, getuint(&ap, lflag), 10, width, pad);
-                break;
-            case 'x':
-                printnum(punch, putdat, getuint(&ap, lflag), 16, width, pad);
-                break;
-            case 'c':
-                punch(va_arg(ap, int), putdat);
-                break;
-            case 's':
-                printstr(va_arg(ap, char *));
-                break;
-            default:
-                punch(*fmt, putdat);
-                break;
-            }
+            putch(ch, putdat);
         }
-        else
+        fmt++; // Skip '%'
+
+        last_fmt = fmt; // Remember the start of the format specifier
+        padc = ' ';
+        width = -1;
+        precision = -1;
+        altflag = 0;
+        lflag = 0; // No length flag
+    reswitch:
+        switch (ch = *(unsigned char *)fmt++)
         {
-            punch(*fmt++, putdat);
+        case '-':
+            padc = '-';
+            goto reswitch; // Left justify
+            break;
+
+        case '0':
+            padc = '0';
+            goto reswitch; // Zero padding
+            break;
+
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            for (precision = 0;; ++fmt)
+            {
+                precision = precision * 10 + (ch - '0');
+                ch = *(unsigned char *)fmt;
+                if (ch < '0' || ch > '9')
+                    break;
+            }
+            goto process_precision;
+
+        case '*':
+            precision = va_arg(ap, int);
+            goto process_precision;
+
+        case '.':
+            if (width < 0)
+            {
+                width = 0; // If width was not set, set it to 0
+            }
+            goto reswitch; // Process precision
+
+        case '#':
+            altflag = 1;   // Alternate form
+            goto reswitch; // Continue processing
+
+        process_precision:
+            if (width < 0)
+            {
+                width = precision, precision = -1; // Default width
+            }
+            goto reswitch; // Continue processing
+
+        case 'l':
+            lflag++;
+            goto reswitch; // Long modifier
+
+        case 'c':
+            putch(va_arg(ap, int), putdat); // Character
+            break;
+        case 's':
+            if ((p = va_arg(ap, const char *)) == NULL)
+            {
+                p = "(null)"; // Handle null string
+            }
+            if (width > 0 && padc != '-')
+                for (width -= strnlen(p, precision); width > 0; width--)
+                {
+                    putch(padc, putdat); // Pad with spaces or zeros
+                }
+            for (; (ch = *p) != '\0' && (precision < 0 || precision-- > 0); width--)
+            {
+                putch(ch, putdat); // Print each character
+                p++;
+            }
+            for (; width > 0; width--)
+            {
+                putch(' ', putdat); // Right pad with spaces
+            }
+            break;
+
+        case 'h':
+        {
+            Half h16;
+            h16 = va_arg(ap, int);
+            if (((h16 >> 10) & 0x1f) == 0x1f)
+            {
+                if ((h16 & 0x3ff) == 0)
+                {
+                    if (h16 & (1 << 15))
+                    {
+                        putch('-', putdat);
+                    }
+                    putch('I', putdat);
+                    putch('n', putdat);
+                    putch('f', putdat);
+                }
+                else
+                {
+                    putch('N', putdat);
+                    putch('a', putdat);
+                    putch('N', putdat);
+                }
+            }
+            else
+            {
+                // Convert half-precision float to string
+                float tmp = half_to_float(h16);
+                if (tmp < 0)
+                {
+                    putch('-', putdat);
+                    tmp = -tmp; // Handle negative numbers
+                }
+                num = (unsigned)tmp;
+                printnum(putch, putdat, num, 10, -1, ' ');
+                putch('.', putdat);                      // Print decimal point
+                num = (unsigned)((tmp - num) * 1000000); // Get fractional part
+                if (num == 0)
+                {
+                    putch('0', putdat); // Print zero if no fractional part
+                }
+                else if (num < 10)
+                {
+                    putch('0', putdat); // Print leading zero for single digit
+                    putch('0', putdat);
+                    putch('0', putdat);
+                    putch('0', putdat);
+                }
+                else if (num < 100)
+                {
+                    putch('0', putdat);
+                    putch('0', putdat);
+                    putch('0', putdat);
+                }
+                else if (num < 1000)
+                {
+                    putch('0', putdat);
+                    putch('0', putdat);
+                }
+                else if (num < 10000)
+                {
+                    putch('0', putdat);
+                }
+                printnum(putch, putdat, num, 10, -1, ' '); // Print fractional part
+            }
+            break;
+        }
+
+        case 'd':
+            num = getint(&ap, lflag); // Signed decimal integer
+            if ((long long)num < 0)
+            {
+                putch('-', putdat);
+                num = -(long long)num; // Handle negative numbers
+            }
+            base = 10;
+            goto signed_number;
+        case 'u':
+            base = 10; // Unsigned decimal integer
+            goto unsigned_number;
+        case 'o':
+            base = 8; // Unsigned octal integer
+            goto unsigned_number;
+        case 'p':
+            static_assert(sizeof(void *) == sizeof(long));
+            lflag = 1;
+            putch('0', putdat); // Print '0' prefix for pointer
+            putch('x', putdat); // Print 'x' for hexadecimal pointer
+        case 'x':
+            base = 16; // Unsigned hexadecimal integer
+            goto unsigned_number;
+        unsigned_number:
+            num = getuint(&ap, lflag); // Get unsigned integer
+        signed_number:
+            printnum(putch, putdat, num, base, width, padc);
+            break;
+        case '%':
+            putch(ch, putdat); // Print literal '%'
+        default:
+            putch('%', putdat); // Print any other character
+            fmt = last_fmt;     // Restore format string to the last format specifier
+            break;
         }
     }
 }
@@ -287,15 +455,15 @@ int sprintf(char *str, const char *fmt, ...)
     void sprintf_punch(int ch, void **data)
     {
         char **pstr = (char **)data;
-        **pstr =ch;
+        **pstr = ch;
         (*pstr)++;
     }
 
-    vprintfmt(sprintf_punch, (void**)&str, fmt, ap);
-    *str=0;
+    vprintfmt(sprintf_punch, (void **)&str, fmt, ap);
+    *str = 0;
 
     va_end(ap);
-    return str -str0; // Return the number of characters written
+    return str - str0; // Return the number of characters written
 }
 
 void *memcpy(void *dest, const void *src, size_t len)
@@ -368,6 +536,14 @@ size_t strlen(const char *s)
 {
     const char *p = s;
     while (*p)
+        p++;
+    return p - s;
+}
+
+size_t strnlen(const char *s, size_t n)
+{
+    const char *p = s;
+    while (n-- && *p)
         p++;
     return p - s;
 }
