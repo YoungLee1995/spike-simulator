@@ -10,7 +10,7 @@ ENTRY(_start)
 SECTIONS
 {
     /* text: test code section */
-    . = 0x7f000000;
+    . = 0x80000000;
     .text.init : { *(.text.init)}
 
     . = ALIGN(0x1000);
@@ -48,5 +48,6 @@ SECTIONS
         _tbss_end = .;
     }
 
+    /* End of unintialized data segment*/
     _end = .;
 }

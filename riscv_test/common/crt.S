@@ -61,7 +61,7 @@ _start:
   j 2b
 1:
 
-#if
+#ifdef __riscv_flen
   la t0,1f
   csrw mtvec, t0
 
@@ -164,7 +164,7 @@ trap_entry:
   csrr a0, mcause
   csrr a1, mepc
   mv a2, sp
-  jal hand_trap
+  jal handle_trap
   csrw mepc, a0
 
   li t0,MSTATUS_MPP
