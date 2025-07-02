@@ -3,6 +3,7 @@ default: all
 
 bmarks = \
 		hello \
+		dispatch \
 		#softmax
 
 src_dir = .
@@ -16,7 +17,7 @@ RISCV_LINK		 ?= $(RISCV_GCC) -T $(src_dir)/common/test.ld $(incs)
 # RISCV_LINK_OPTS	 ?= -static -nostartfiles -nostdlib -lm -lgcc -T $(src_dir)/common/test.ld #-Wl,-Map,$(src_dir)/common/test.map
 RISCV_LINK_OPTS	 ?= -static -nostartfiles -nostdlib -lm -lgcc -T $(src_dir)/common/test.ld -Wl,-Map,$(src_dir)/common/test.map
 RISCV_OBJDUMP	 ?= $(RISCV_PREFIX)objdump --disassemble-all 
-RISCV_SIM 		 ?= spike --isa=rv$(XLEN)imafdc #--pc=0x80000000
+RISCV_SIM 		 ?= spike --isa=rv$(XLEN)imafdcv #--pc=0x80000000
 #RISCV_SIM 		 ?= spike --disable-dtb --isa=rv32imafc
 
 define compile_template

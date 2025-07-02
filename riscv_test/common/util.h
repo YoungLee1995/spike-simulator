@@ -18,6 +18,12 @@ extern void setStats(int enable);
 #define read_reg(reg) ({unsigned long __tmp; asm volatile ("mv %0" #reg: "=r"(__tmp)); __tmp; })
 #define write_reg(reg, value) ({ asm volatile("mv " #reg ", %0" : : "r"(value)); })
 
+#define get_regl(Addr) (*(volatile uint64_t *)(Addr))
+#define set_regl(Addr, Value) (*(volatile uint64_t *)(Addr) = (uint64_t)(Value))
+
+#define read_regl(reg) ({unsigned long long __tmp; asm volatile ("mv %0" #reg: "=r"(__tmp)); __tmp; })
+#define write_regl(reg, value) ({ asm volatile("mv " #reg ", %0" : : "r"(value)); })
+
 static int verify(int n, const volatile int *test, const int *verify)
 {
     int i;
