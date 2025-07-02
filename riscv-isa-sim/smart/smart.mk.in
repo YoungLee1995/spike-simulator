@@ -1,0 +1,13 @@
+smart_subproject_deps = softfloat
+
+smart_srcs = \
+    sm_main.cc\
+    sm_insns.cc\
+    sm_dispatch.cc
+
+smart_install_shared_lib = yes
+
+smart_test_srcs =
+
+smart_install_hdrs = \
+    sm_regs.h \

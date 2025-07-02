@@ -8,6 +8,7 @@
 #include "remote_bitbang.h"
 #include "cachesim.h"
 #include "extension.h"
+#include "smart.h"
 #include <dlfcn.h>
 #include <fesvr/option_parser.h>
 #include <stdexcept>
@@ -72,12 +73,12 @@ static void help(int exit_code = 1)
   fprintf(stderr, "  --triggers=<n>        Number of supported triggers [default 4]\n");
   fprintf(stderr, "  --dm-progsize=<words> Progsize for the debug module [default 2]\n");
   fprintf(stderr, "  --dm-sba=<bits>       Debug system bus access supports up to "
-      "<bits> wide accesses [default 0]\n");
+                  "<bits> wide accesses [default 0]\n");
   fprintf(stderr, "  --dm-auth             Debug module requires debugger to authenticate\n");
   fprintf(stderr, "  --dmi-rti=<n>         Number of Run-Test/Idle cycles "
-      "required for a DMI access [default 0]\n");
+                  "required for a DMI access [default 0]\n");
   fprintf(stderr, "  --dm-abstract-rti=<n> Number of Run-Test/Idle cycles "
-      "required for an abstract command to execute [default 0]\n");
+                  "required for an abstract command to execute [default 0]\n");
   fprintf(stderr, "  --dm-no-hasel         Debug module supports hasel\n");
   fprintf(stderr, "  --dm-no-abstract-csr  Debug module won't support abstract CSR access\n");
   fprintf(stderr, "  --dm-no-abstract-fpr  Debug module won't support abstract FPR access\n");
@@ -106,15 +107,15 @@ static std::ifstream::pos_type get_file_size(const char *filename)
   return in.tellg();
 }
 
-static void read_file_bytes(const char *filename,size_t fileoff,
-                            abstract_mem_t* mem, size_t memoff, size_t read_sz)
+static void read_file_bytes(const char *filename, size_t fileoff,
+                            abstract_mem_t *mem, size_t memoff, size_t read_sz)
 {
   std::ifstream in(filename, std::ios::in | std::ios::binary);
   in.seekg(fileoff, std::ios::beg);
 
   std::vector<char> read_buf(read_sz, 0);
   in.read(&read_buf[0], read_sz);
-  mem->store(memoff, read_sz, (uint8_t*)&read_buf[0]);
+  mem->store(memoff, read_sz, (uint8_t *)&read_buf[0]);
 }
 
 bool sort_mem_region(const mem_cfg_t &a, const mem_cfg_t &b)
@@ -125,13 +126,13 @@ bool sort_mem_region(const mem_cfg_t &a, const mem_cfg_t &b)
     return (a.get_base() < b.get_base());
 }
 
-static bool check_mem_overlap(const mem_cfg_t& L, const mem_cfg_t& R)
+static bool check_mem_overlap(const mem_cfg_t &L, const mem_cfg_t &R)
 {
   return std::max(L.get_base(), R.get_base()) <= std::min(L.get_inclusive_end(), R.get_inclusive_end());
 }
 
-static bool check_if_merge_covers_64bit_space(const mem_cfg_t& L,
-                                              const mem_cfg_t& R)
+static bool check_if_merge_covers_64bit_space(const mem_cfg_t &L,
+                                              const mem_cfg_t &R)
 {
   if (!check_mem_overlap(L, R))
     return false;
@@ -142,7 +143,7 @@ static bool check_if_merge_covers_64bit_space(const mem_cfg_t& L,
   return (start == 0ull) && (end == std::numeric_limits<uint64_t>::max());
 }
 
-static mem_cfg_t merge_mem_regions(const mem_cfg_t& L, const mem_cfg_t& R)
+static mem_cfg_t merge_mem_regions(const mem_cfg_t &L, const mem_cfg_t &R)
 {
   // one can merge only intersecting regions
   assert(check_mem_overlap(L, R));
@@ -167,9 +168,11 @@ merge_overlapping_memory_regions(std::vector<mem_cfg_t> mems)
   std::vector<mem_cfg_t> merged_mem;
   merged_mem.push_back(mems.front());
 
-  for (auto mem_it = std::next(mems.begin()); mem_it != mems.end(); ++mem_it) {
-    const auto& mem_int = *mem_it;
-    if (!check_mem_overlap(merged_mem.back(), mem_int)) {
+  for (auto mem_it = std::next(mems.begin()); mem_it != mems.end(); ++mem_it)
+  {
+    const auto &mem_int = *mem_it;
+    if (!check_mem_overlap(merged_mem.back(), mem_int))
+    {
       merged_mem.push_back(mem_int);
       continue;
     }
@@ -179,7 +182,8 @@ merge_overlapping_memory_regions(std::vector<mem_cfg_t> mems)
     // actual size field is effectively a 64 bit value)
     // so we create two smaller memory regions that total for 2^64 bytes as
     // a workaround
-    if (check_if_merge_covers_64bit_space(merged_mem.back(), mem_int)) {
+    if (check_if_merge_covers_64bit_space(merged_mem.back(), mem_int))
+    {
       merged_mem.clear();
       merged_mem.push_back(mem_cfg_t(0ull, 0ull - PGSIZE));
       merged_mem.push_back(mem_cfg_t(0ull - PGSIZE, PGSIZE));
@@ -200,13 +204,15 @@ static mem_cfg_t create_mem_region(unsigned long long base, unsigned long long s
   if (size % PGSIZE != 0)
     size += PGSIZE - size % PGSIZE;
 
-  if (size != size0) {
+  if (size != size0)
+  {
     fprintf(stderr, "Warning: the memory at [0x%llX, 0x%llX] has been realigned\n"
                     "to the %ld KiB page size: [0x%llX, 0x%llX]\n",
             base0, base0 + size0 - 1, long(PGSIZE / 1024), base, base + size - 1);
   }
 
-  if (!mem_cfg_t::check_if_supported(base, size)) {
+  if (!mem_cfg_t::check_if_supported(base, size))
+  {
     fprintf(stderr, "Unsupported memory region "
                     "{base = 0x%llX, size = 0x%llX} specified\n",
             base, size);
@@ -216,14 +222,15 @@ static mem_cfg_t create_mem_region(unsigned long long base, unsigned long long s
   return mem_cfg_t(base, size);
 }
 
-static std::vector<mem_cfg_t> parse_mem_layout(const char* arg)
+static std::vector<mem_cfg_t> parse_mem_layout(const char *arg)
 {
   std::vector<mem_cfg_t> res;
 
   // handle legacy mem argument
-  char* p;
+  char *p;
   auto mb = strtoull(arg, &p, 0);
-  if (*p == 0) {
+  if (*p == 0)
+  {
     reg_t size = reg_t(mb) << 20;
     if ((size >> 20) != mb)
       throw std::runtime_error("Memory size too large");
@@ -232,7 +239,8 @@ static std::vector<mem_cfg_t> parse_mem_layout(const char* arg)
   }
 
   // handle base/size tuples
-  while (true) {
+  while (true)
+  {
     auto base = strtoull(arg, &p, 0);
     if (!*p || *p != ':')
       help();
@@ -253,26 +261,27 @@ static std::vector<mem_cfg_t> parse_mem_layout(const char* arg)
   return merged_mem;
 }
 
-static std::vector<std::pair<reg_t, abstract_mem_t*>> make_mems(const std::vector<mem_cfg_t> &layout)
+static std::vector<std::pair<reg_t, abstract_mem_t *>> make_mems(const std::vector<mem_cfg_t> &layout)
 {
-  std::vector<std::pair<reg_t, abstract_mem_t*>> mems;
+  std::vector<std::pair<reg_t, abstract_mem_t *>> mems;
   mems.reserve(layout.size());
-  for (const auto &cfg : layout) {
+  for (const auto &cfg : layout)
+  {
     mems.push_back(std::make_pair(cfg.get_base(), new mem_t(cfg.get_size())));
   }
   return mems;
 }
 
-static unsigned long atoul_safe(const char* s)
+static unsigned long atoul_safe(const char *s)
 {
-  char* e;
+  char *e;
   auto res = strtoul(s, &e, 10);
   if (*e)
     help();
   return res;
 }
 
-static unsigned long atoul_nonzero_safe(const char* s)
+static unsigned long atoul_nonzero_safe(const char *s)
 {
   auto res = atoul_safe(s);
   if (!res)
@@ -287,17 +296,21 @@ static std::vector<size_t> parse_hartids(const char *s)
   std::vector<size_t> hartids;
 
   int n;
-  while (stream >> n) {
-    if (n < 0) {
+  while (stream >> n)
+  {
+    if (n < 0)
+    {
       fprintf(stderr, "Negative hart ID %d is unsupported\n", n);
       exit(-1);
     }
 
     hartids.push_back(n);
-    if (stream.peek() == ',') stream.ignore();
+    if (stream.peek() == ',')
+      stream.ignore();
   }
 
-  if (hartids.empty()) {
+  if (hartids.empty())
+  {
     fprintf(stderr, "No hart IDs specified\n");
     exit(-1);
   }
@@ -305,7 +318,8 @@ static std::vector<size_t> parse_hartids(const char *s)
   std::sort(hartids.begin(), hartids.end());
 
   const auto dup = std::adjacent_find(hartids.begin(), hartids.end());
-  if (dup != hartids.end()) {
+  if (dup != hartids.end())
+  {
     fprintf(stderr, "Duplicate hart ID %zu\n", *dup);
     exit(-1);
   }
@@ -313,16 +327,16 @@ static std::vector<size_t> parse_hartids(const char *s)
   return hartids;
 }
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
   bool debug = false;
   bool halted = false;
   bool histogram = false;
   bool log = false;
-  bool UNUSED socket = false;  // command line option -s
+  bool UNUSED socket = false; // command line option -s
   bool dump_dts = false;
   bool dtb_enabled = true;
-  const char* kernel = NULL;
+  const char *kernel = NULL;
   reg_t kernel_offset, kernel_size;
   std::vector<device_factory_sargs_t> plugin_device_factories;
   std::unique_ptr<icache_sim_t> ic;
@@ -331,9 +345,9 @@ int main(int argc, char** argv)
   bool log_cache = false;
   bool log_commits = false;
   const char *log_path = nullptr;
-  std::vector<std::function<extension_t*()>> extensions;
-  const char* initrd = NULL;
-  const char* dtb_file = NULL;
+  std::vector<std::function<extension_t *()>> extensions;
+  const char *initrd = NULL;
+  const char *dtb_file = NULL;
   uint16_t rbb_port = 0;
   bool use_rbb = false;
   unsigned dmi_rti = 0;
@@ -343,22 +357,27 @@ int main(int argc, char** argv)
 
   cfg_t cfg;
 
-  auto const device_parser = [&plugin_device_factories](const char *s) {
+  auto const device_parser = [&plugin_device_factories](const char *s)
+  {
     const std::string device_args(s);
     std::vector<std::string> parsed_args;
     std::stringstream sstr(device_args);
-    while (sstr.good()) {
+    while (sstr.good())
+    {
       std::string substr;
       getline(sstr, substr, ',');
       parsed_args.push_back(substr);
     }
-    if (parsed_args.empty()) throw std::runtime_error("Plugin argument is empty.");
+    if (parsed_args.empty())
+      throw std::runtime_error("Plugin argument is empty.");
 
     const std::string name = parsed_args[0];
-    if (name.empty()) throw std::runtime_error("Plugin name is empty.");
+    if (name.empty())
+      throw std::runtime_error("Plugin name is empty.");
 
     auto it = mmio_device_map().find(name);
-    if (it == mmio_device_map().end()) throw std::runtime_error("Plugin \"" + name + "\" not found in loaded extlibs.");
+    if (it == mmio_device_map().end())
+      throw std::runtime_error("Plugin \"" + name + "\" not found in loaded extlibs.");
 
     parsed_args.erase(parsed_args.begin());
     plugin_device_factories.push_back(std::make_pair(it->second, parsed_args));
@@ -366,81 +385,123 @@ int main(int argc, char** argv)
 
   option_parser_t parser;
   parser.help(&suggest_help);
-  parser.option('h', "help", 0, [&](const char UNUSED *s){help(0);});
-  parser.option('d', 0, 0, [&](const char UNUSED *s){debug = true;});
-  parser.option('g', 0, 0, [&](const char UNUSED *s){histogram = true;});
-  parser.option('l', 0, 0, [&](const char UNUSED *s){log = true;});
+  parser.option('h', "help", 0, [&](const char UNUSED *s)
+                { help(0); });
+  parser.option('d', 0, 0, [&](const char UNUSED *s)
+                { debug = true; });
+  parser.option('g', 0, 0, [&](const char UNUSED *s)
+                { histogram = true; });
+  parser.option('l', 0, 0, [&](const char UNUSED *s)
+                { log = true; });
 #ifdef HAVE_BOOST_ASIO
-  parser.option('s', 0, 0, [&](const char UNUSED *s){socket = true;});
+  parser.option('s', 0, 0, [&](const char UNUSED *s)
+                { socket = true; });
 #endif
-  parser.option('p', 0, 1, [&](const char* s){nprocs = atoul_nonzero_safe(s);});
-  parser.option('m', 0, 1, [&](const char* s){cfg.mem_layout = parse_mem_layout(s);});
-  parser.option(0, "halted", 0, [&](const char UNUSED *s){halted = true;});
-  parser.option(0, "rbb-port", 1, [&](const char* s){use_rbb = true; rbb_port = atoul_safe(s);});
-  parser.option(0, "pc", 1, [&](const char* s){cfg.start_pc = strtoull(s, 0, 0);});
-  parser.option(0, "hartids", 1, [&](const char* s){
+  parser.option('p', 0, 1, [&](const char *s)
+                { nprocs = atoul_nonzero_safe(s); });
+  parser.option('m', 0, 1, [&](const char *s)
+                { cfg.mem_layout = parse_mem_layout(s); });
+  parser.option(0, "halted", 0, [&](const char UNUSED *s)
+                { halted = true; });
+  parser.option(0, "rbb-port", 1, [&](const char *s)
+                {use_rbb = true; rbb_port = atoul_safe(s); });
+  parser.option(0, "pc", 1, [&](const char *s)
+                { cfg.start_pc = strtoull(s, 0, 0); });
+  parser.option(0, "hartids", 1, [&](const char *s)
+                {
     cfg.hartids = parse_hartids(s);
-    cfg.explicit_hartids = true;
-  });
-  parser.option(0, "ic", 1, [&](const char* s){ic.reset(new icache_sim_t(s));});
-  parser.option(0, "dc", 1, [&](const char* s){dc.reset(new dcache_sim_t(s));});
-  parser.option(0, "l2", 1, [&](const char* s){l2.reset(cache_sim_t::construct(s, "L2$"));});
-  parser.option(0, "big-endian", 0, [&](const char UNUSED *s){cfg.endianness = endianness_big;});
-  parser.option(0, "misaligned", 0, [&](const char UNUSED *s){cfg.misaligned = true;});
-  parser.option(0, "log-cache-miss", 0, [&](const char UNUSED *s){log_cache = true;});
-  parser.option(0, "isa", 1, [&](const char* s){cfg.isa = s;});
-  parser.option(0, "pmpregions", 1, [&](const char* s){cfg.pmpregions = atoul_safe(s);});
-  parser.option(0, "pmpgranularity", 1, [&](const char* s){cfg.pmpgranularity = atoul_safe(s);});
-  parser.option(0, "priv", 1, [&](const char* s){cfg.priv = s;});
+    cfg.explicit_hartids = true; });
+  parser.option(0, "ic", 1, [&](const char *s)
+                { ic.reset(new icache_sim_t(s)); });
+  parser.option(0, "dc", 1, [&](const char *s)
+                { dc.reset(new dcache_sim_t(s)); });
+  parser.option(0, "l2", 1, [&](const char *s)
+                { l2.reset(cache_sim_t::construct(s, "L2$")); });
+  parser.option(0, "big-endian", 0, [&](const char UNUSED *s)
+                { cfg.endianness = endianness_big; });
+  parser.option(0, "misaligned", 0, [&](const char UNUSED *s)
+                { cfg.misaligned = true; });
+  parser.option(0, "log-cache-miss", 0, [&](const char UNUSED *s)
+                { log_cache = true; });
+  parser.option(0, "isa", 1, [&](const char *s)
+                { cfg.isa = s; });
+  parser.option(0, "pmpregions", 1, [&](const char *s)
+                { cfg.pmpregions = atoul_safe(s); });
+  parser.option(0, "pmpgranularity", 1, [&](const char *s)
+                { cfg.pmpgranularity = atoul_safe(s); });
+  parser.option(0, "priv", 1, [&](const char *s)
+                { cfg.priv = s; });
   parser.option(0, "device", 1, device_parser);
-  parser.option(0, "extension", 1, [&](const char* s){extensions.push_back(find_extension(s));});
-  parser.option(0, "dump-dts", 0, [&](const char UNUSED *s){dump_dts = true;});
-  parser.option(0, "disable-dtb", 0, [&](const char UNUSED *s){dtb_enabled = false;});
-  parser.option(0, "dtb", 1, [&](const char *s){dtb_file = s;});
-  parser.option(0, "kernel", 1, [&](const char* s){kernel = s;});
-  parser.option(0, "initrd", 1, [&](const char* s){initrd = s;});
-  parser.option(0, "bootargs", 1, [&](const char* s){cfg.bootargs = s;});
-  parser.option(0, "real-time-clint", 0, [&](const char UNUSED *s){cfg.real_time_clint = true;});
-  parser.option(0, "triggers", 1, [&](const char *s){cfg.trigger_count = atoul_safe(s);});
-  parser.option(0, "extlib", 1, [&](const char *s){
+  parser.option(0, "extension", 1, [&](const char *s)
+                { extensions.push_back(find_extension(s)); });
+  parser.option(0, "dump-dts", 0, [&](const char UNUSED *s)
+                { dump_dts = true; });
+  parser.option(0, "disable-dtb", 0, [&](const char UNUSED *s)
+                { dtb_enabled = false; });
+  parser.option(0, "dtb", 1, [&](const char *s)
+                { dtb_file = s; });
+  parser.option(0, "kernel", 1, [&](const char *s)
+                { kernel = s; });
+  parser.option(0, "initrd", 1, [&](const char *s)
+                { initrd = s; });
+  parser.option(0, "bootargs", 1, [&](const char *s)
+                { cfg.bootargs = s; });
+  parser.option(0, "real-time-clint", 0, [&](const char UNUSED *s)
+                { cfg.real_time_clint = true; });
+  parser.option(0, "triggers", 1, [&](const char *s)
+                { cfg.trigger_count = atoul_safe(s); });
+  parser.option(0, "extlib", 1, [&](const char *s)
+                {
     void *lib = dlopen(s, RTLD_NOW | RTLD_GLOBAL);
     if (lib == NULL) {
       fprintf(stderr, "Unable to load extlib '%s': %s\n", s, dlerror());
       exit(-1);
-    }
-  });
+    } });
   parser.option(0, "dm-progsize", 1,
-      [&](const char* s){dm_config.progbufsize = atoul_safe(s);});
+                [&](const char *s)
+                { dm_config.progbufsize = atoul_safe(s); });
   parser.option(0, "dm-no-impebreak", 0,
-      [&](const char UNUSED *s){dm_config.support_impebreak = false;});
+                [&](const char UNUSED *s)
+                { dm_config.support_impebreak = false; });
   parser.option(0, "dm-sba", 1,
-      [&](const char* s){dm_config.max_sba_data_width = atoul_safe(s);});
+                [&](const char *s)
+                { dm_config.max_sba_data_width = atoul_safe(s); });
   parser.option(0, "dm-auth", 0,
-      [&](const char UNUSED *s){dm_config.require_authentication = true;});
+                [&](const char UNUSED *s)
+                { dm_config.require_authentication = true; });
   parser.option(0, "dmi-rti", 1,
-      [&](const char* s){dmi_rti = atoul_safe(s);});
+                [&](const char *s)
+                { dmi_rti = atoul_safe(s); });
   parser.option(0, "dm-abstract-rti", 1,
-      [&](const char* s){dm_config.abstract_rti = atoul_safe(s);});
+                [&](const char *s)
+                { dm_config.abstract_rti = atoul_safe(s); });
   parser.option(0, "dm-no-hasel", 0,
-      [&](const char UNUSED *s){dm_config.support_hasel = false;});
+                [&](const char UNUSED *s)
+                { dm_config.support_hasel = false; });
   parser.option(0, "dm-no-abstract-csr", 0,
-      [&](const char UNUSED *s){dm_config.support_abstract_csr_access = false;});
+                [&](const char UNUSED *s)
+                { dm_config.support_abstract_csr_access = false; });
   parser.option(0, "dm-no-abstract-fpr", 0,
-      [&](const char UNUSED *s){dm_config.support_abstract_fpr_access = false;});
+                [&](const char UNUSED *s)
+                { dm_config.support_abstract_fpr_access = false; });
   parser.option(0, "dm-no-halt-groups", 0,
-      [&](const char UNUSED *s){dm_config.support_haltgroups = false;});
+                [&](const char UNUSED *s)
+                { dm_config.support_haltgroups = false; });
   parser.option(0, "log-commits", 0,
-                [&](const char UNUSED *s){log_commits = true;});
+                [&](const char UNUSED *s)
+                { log_commits = true; });
   parser.option(0, "log", 1,
-                [&](const char* s){log_path = s;});
+                [&](const char *s)
+                { log_path = s; });
   FILE *cmd_file = NULL;
-  parser.option(0, "debug-cmd", 1, [&](const char* s){
+  parser.option(0, "debug-cmd", 1, [&](const char *s)
+                {
      if ((cmd_file = fopen(s, "r"))==NULL) {
         fprintf(stderr, "Unable to open command file '%s'\n", s);
         exit(-1);
-     }
-  });
-  parser.option(0, "blocksz", 1, [&](const char* s){
+     } });
+  parser.option(0, "blocksz", 1, [&](const char *s)
+                {
     blocksz = strtoull(s, 0, 0);
     const unsigned min_blocksz = 16;
     const unsigned max_blocksz = PGSIZE;
@@ -448,91 +509,132 @@ int main(int argc, char** argv)
       fprintf(stderr, "--blocksz must be a power of 2 between %u and %u\n",
         min_blocksz, max_blocksz);
       exit(-1);
-    }
-  });
+    } });
 
   auto argv1 = parser.parse(argv);
-  std::vector<std::string> htif_args(argv1, (const char*const*)argv + argc);
+  std::vector<std::string> htif_args(argv1, (const char *const *)argv + argc);
 
   if (!*argv1)
     help();
 
-  std::vector<std::pair<reg_t, abstract_mem_t*>> mems =
+  // liyang date: 2025-07-01
+  if (!cfg.isa)
+  {
+    cfg.isa = "rv64imafdcv";
+  }
+  // hartid
+  cfg.explicit_hartids = true;
+  cfg.hartids.clear();
+  for (int i = 0; i < 5; i++)
+  {
+    cfg.hartids.push_back(i);
+  }
+  // memory, later align with HW
+  cfg.mem_layout.clear();
+  cfg.mem_layout.push_back(mem_cfg_t(0x80000000, 0x180000000)); // 2G~8G
+  cfg.mem_layout.push_back(mem_cfg_t(0x3f000000, 0x800000));    // 1G -16M, 8M
+  for (int i = 1; i <= 4; i++)
+    cfg.mem_layout.push_back(mem_cfg_t(0x40000000 + i * 0x2000000, 0x400000)); // 1G -16M, 1M
+
+  std::vector<std::pair<reg_t, abstract_mem_t *>> mems =
       make_mems(cfg.mem_layout);
 
-  if (kernel && check_file_exists(kernel)) {
+  if (kernel && check_file_exists(kernel))
+  {
     const char *isa = cfg.isa;
     kernel_size = get_file_size(kernel);
     if (isa[2] == '6' && isa[3] == '4')
       kernel_offset = 0x200000;
     else
       kernel_offset = 0x400000;
-    for (auto& m : mems) {
-      if (kernel_size && (kernel_offset + kernel_size) < m.second->size()) {
-         read_file_bytes(kernel, 0, m.second, kernel_offset, kernel_size);
-         break;
+    for (auto &m : mems)
+    {
+      if (kernel_size && (kernel_offset + kernel_size) < m.second->size())
+      {
+        read_file_bytes(kernel, 0, m.second, kernel_offset, kernel_size);
+        break;
       }
     }
   }
 
-  if (initrd && check_file_exists(initrd)) {
+  if (initrd && check_file_exists(initrd))
+  {
     size_t initrd_size = get_file_size(initrd);
-    for (auto& m : mems) {
-      if (initrd_size && (initrd_size + 0x1000) < m.second->size()) {
-         reg_t initrd_end = m.first + m.second->size() - 0x1000;
-         reg_t initrd_start = initrd_end - initrd_size;
-         cfg.initrd_bounds = std::make_pair(initrd_start, initrd_end);
-         read_file_bytes(initrd, 0, m.second, initrd_start - m.first, initrd_size);
-         break;
+    for (auto &m : mems)
+    {
+      if (initrd_size && (initrd_size + 0x1000) < m.second->size())
+      {
+        reg_t initrd_end = m.first + m.second->size() - 0x1000;
+        reg_t initrd_start = initrd_end - initrd_size;
+        cfg.initrd_bounds = std::make_pair(initrd_start, initrd_end);
+        read_file_bytes(initrd, 0, m.second, initrd_start - m.first, initrd_size);
+        break;
       }
     }
   }
 
-  if (cfg.explicit_hartids) {
-    if (nprocs.overridden() && (nprocs() != cfg.nprocs())) {
+  if (cfg.explicit_hartids)
+  {
+    if (nprocs.overridden() && (nprocs() != cfg.nprocs()))
+    {
       std::cerr << "Number of specified hartids ("
                 << cfg.nprocs()
                 << ") doesn't match specified number of processors ("
                 << nprocs() << ").\n";
       exit(1);
     }
-  } else {
+  }
+  else
+  {
     // Set default set of hartids based on nprocs, but don't set the
     // explicit_hartids flag (which means that downstream code can know that
     // we've only set the number of harts, not explicitly chosen their IDs).
     std::vector<size_t> default_hartids;
     default_hartids.reserve(nprocs());
-    for (size_t i = 0; i < nprocs(); ++i) {
+    for (size_t i = 0; i < nprocs(); ++i)
+    {
       default_hartids.push_back(i);
     }
     cfg.hartids = default_hartids;
   }
 
   sim_t s(&cfg, halted,
-      mems, plugin_device_factories, htif_args, dm_config, log_path, dtb_enabled, dtb_file,
-      socket,
-      cmd_file);
-  std::unique_ptr<remote_bitbang_t> remote_bitbang((remote_bitbang_t *) NULL);
+          mems, plugin_device_factories, htif_args, dm_config, log_path, dtb_enabled, dtb_file,
+          socket,
+          cmd_file);
+
+  // date: 2025-07-01 liyang
+  sm_start(&s);
+
+  std::unique_ptr<remote_bitbang_t> remote_bitbang((remote_bitbang_t *)NULL);
   std::unique_ptr<jtag_dtm_t> jtag_dtm(
       new jtag_dtm_t(&s.debug_module, dmi_rti));
-  if (use_rbb) {
+  if (use_rbb)
+  {
     remote_bitbang.reset(new remote_bitbang_t(rbb_port, &(*jtag_dtm)));
     s.set_remote_bitbang(&(*remote_bitbang));
   }
 
-  if (dump_dts) {
+  if (dump_dts)
+  {
     printf("%s", s.get_dts());
     return 0;
   }
 
-  if (ic && l2) ic->set_miss_handler(&*l2);
-  if (dc && l2) dc->set_miss_handler(&*l2);
-  if (ic) ic->set_log(log_cache);
-  if (dc) dc->set_log(log_cache);
+  if (ic && l2)
+    ic->set_miss_handler(&*l2);
+  if (dc && l2)
+    dc->set_miss_handler(&*l2);
+  if (ic)
+    ic->set_log(log_cache);
+  if (dc)
+    dc->set_log(log_cache);
   for (size_t i = 0; i < cfg.nprocs(); i++)
   {
-    if (ic) s.get_core(i)->get_mmu()->register_memtracer(&*ic);
-    if (dc) s.get_core(i)->get_mmu()->register_memtracer(&*dc);
+    if (ic)
+      s.get_core(i)->get_mmu()->register_memtracer(&*ic);
+    if (dc)
+      s.get_core(i)->get_mmu()->register_memtracer(&*dc);
     for (auto e : extensions)
       s.get_core(i)->register_extension(e());
     s.get_core(i)->get_mmu()->set_cache_blocksz(blocksz);
@@ -544,7 +646,7 @@ int main(int argc, char** argv)
 
   auto return_code = s.run();
 
-  for (auto& mem : mems)
+  for (auto &mem : mems)
     delete mem.second;
 
   return return_code;

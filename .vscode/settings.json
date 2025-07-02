@@ -1,0 +1,19 @@
+{
+    "files.associations": {
+        "*array": "cpp",
+        "deque": "cpp",
+        "list": "cpp",
+        "map": "cpp",
+        "vector": "cpp",
+        "string_view": "cpp",
+        "unordered_map": "cpp",
+        "variant": "cpp",
+        "chrono": "cpp",
+        "mutex": "cpp",
+        "type_traits": "cpp",
+        "tuple": "cpp",
+        "encoding.h": "c",
+        "sm_regs.h": "c",
+        "util.h": "c"
+    },
+}

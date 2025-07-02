@@ -9,6 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <map>
+#include <functional>
 #include <cassert>
 #include "debug_rom_defines.h"
 #include "entropy_source.h"
@@ -433,6 +434,11 @@ public:
 
   vectorUnit_t VU;
   triggers::module_t TM;
+
+
+  bool sm_sched_suspend=0;
+  uint32_t sm_exit_code;
+  std::function<void(processor_t*)> sm_dispatch_finish;
 };
 
 #endif

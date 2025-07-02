@@ -10,7 +10,7 @@
             "request": "launch",
             "program": "${workspaceFolder}/riscv-isa-sim/build/spike",
             "args": [
-                "${workspaceFolder}/riscv_tests/hello.riscv"
+                "${workspaceFolder}/riscv_test/hello.riscv"
             ],
             "stopAtEntry": false,
             "cwd": "${fileDirname}",

@@ -9,6 +9,7 @@
 #include "log_file.h"
 #include "processor.h"
 #include "simif.h"
+#include "smart.h"
 
 #include <fesvr/htif.h>
 #include <vector>
@@ -140,6 +141,7 @@ private:
 
   friend class processor_t;
   friend class mmu_t;
+  friend class sm_main_t;
 
   // htif
   virtual void reset() override;

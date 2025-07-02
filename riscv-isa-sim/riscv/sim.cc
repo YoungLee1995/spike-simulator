@@ -32,50 +32,52 @@ static void handle_signal(int sig)
 
 const size_t sim_t::INTERLEAVE;
 
-extern device_factory_t* clint_factory;
-extern device_factory_t* plic_factory;
-extern device_factory_t* ns16550_factory;
+extern device_factory_t *clint_factory;
+extern device_factory_t *plic_factory;
+extern device_factory_t *ns16550_factory;
 
 sim_t::sim_t(const cfg_t *cfg, bool halted,
-             std::vector<std::pair<reg_t, abstract_mem_t*>> mems,
-             const std::vector<device_factory_sargs_t>& plugin_device_factories,
-             const std::vector<std::string>& args,
+             std::vector<std::pair<reg_t, abstract_mem_t *>> mems,
+             const std::vector<device_factory_sargs_t> &plugin_device_factories,
+             const std::vector<std::string> &args,
              const debug_module_config_t &dm_config,
              const char *log_path,
              bool dtb_enabled, const char *dtb_file,
              bool socket_enabled,
              FILE *cmd_file) // needed for command line option --cmd
-  : htif_t(args),
-    cfg(cfg),
-    mems(mems),
-    dtb_enabled(dtb_enabled),
-    log_file(log_path),
-    cmd_file(cmd_file),
-    sout_(nullptr),
-    current_step(0),
-    current_proc(0),
-    debug(false),
-    histogram_enabled(false),
-    log(false),
-    remote_bitbang(NULL),
-    debug_module(this, dm_config)
+    : htif_t(args),
+      cfg(cfg),
+      mems(mems),
+      dtb_enabled(dtb_enabled),
+      log_file(log_path),
+      cmd_file(cmd_file),
+      sout_(nullptr),
+      current_step(0),
+      current_proc(0),
+      debug(false),
+      histogram_enabled(false),
+      log(false),
+      remote_bitbang(NULL),
+      debug_module(this, dm_config)
 {
   signal(SIGINT, &handle_signal);
 
   sout_.rdbuf(std::cerr.rdbuf()); // debug output goes to stderr by default
 
-  for (auto& x : mems)
+  for (auto &x : mems)
     bus.add_device(x.first, x.second);
 
   bus.add_device(DEBUG_START, &debug_module);
 
   socketif = NULL;
 #ifdef HAVE_BOOST_ASIO
-  if (socket_enabled) {
+  if (socket_enabled)
+  {
     socketif = new socketif_t();
   }
 #else
-  if (socket_enabled) {
+  if (socket_enabled)
+  {
     fputs("Socket support requires compilation with boost asio; "
           "please rebuild the riscv-isa-sim project using "
           "\"configure --with-boost-asio\".\n",
@@ -85,7 +87,8 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
 #endif
 
 #ifndef RISCV_ENABLE_DUAL_ENDIAN
-  if (cfg->endianness != endianness_little) {
+  if (cfg->endianness != endianness_little)
+  {
     fputs("Big-endian support has not been prroperly enabled; "
           "please rebuild the riscv-isa-sim project using "
           "\"configure --enable-dual-endian\".\n",
@@ -97,8 +100,10 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
   debug_mmu = new mmu_t(this, cfg->endianness, NULL);
 
   // When running without using a dtb, skip the fdt-based configuration steps
-  if (!dtb_enabled) {
-    for (size_t i = 0; i < cfg->nprocs(); i++) {
+  if (!dtb_enabled)
+  {
+    for (size_t i = 0; i < cfg->nprocs(); i++)
+    {
       procs.push_back(new processor_t(cfg->isa, cfg->priv,
                                       cfg, this, cfg->hartids[i], halted,
                                       log_file.get(), sout_));
@@ -116,17 +121,19 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
   // particular, the default device tree configuration that you get without
   // setting the dtb_file argument has one.
   std::vector<device_factory_sargs_t> device_factories = {
-    {clint_factory, {}}, // clint must be element 0
-    {plic_factory, {}}, // plic must be element 1
-    {ns16550_factory, {}}};
+      {clint_factory, {}}, // clint must be element 0
+      {plic_factory, {}},  // plic must be element 1
+      {ns16550_factory, {}}};
   device_factories.insert(device_factories.end(),
                           plugin_device_factories.begin(),
                           plugin_device_factories.end());
 
   // Load dtb_file if provided, otherwise self-generate a dts/dtb
-  if (dtb_file) {
+  if (dtb_file)
+  {
     std::ifstream fin(dtb_file, std::ios::binary);
-    if (!fin.good()) {
+    if (!fin.good())
+    {
       std::cerr << "can't find dtb file: " << dtb_file << std::endl;
       exit(-1);
     }
@@ -134,12 +141,15 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
     strstream << fin.rdbuf();
     dtb = strstream.str();
     dts = dtb_to_dts(dtb);
-  } else {
+  }
+  else
+  {
     std::pair<reg_t, reg_t> initrd_bounds = cfg->initrd_bounds;
     std::string device_nodes;
-    for (const device_factory_sargs_t& factory_sargs: device_factories) {
-      const device_factory_t* factory = factory_sargs.first;
-      const std::vector<std::string>& sargs = factory_sargs.second;
+    for (const device_factory_sargs_t &factory_sargs : device_factories)
+    {
+      const device_factory_t *factory = factory_sargs.first;
+      const std::vector<std::string> &sargs = factory_sargs.second;
       device_nodes.append(factory->generate_dts(this, sargs));
     }
     dts = make_dts(INSNS_PER_RTC_TICK, CPU_HZ, cfg, mems, device_nodes);
@@ -147,11 +157,15 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
   }
 
   int fdt_code = fdt_check_header(dtb.c_str());
-  if (fdt_code) {
+  if (fdt_code)
+  {
     std::cerr << "Failed to read DTB from ";
-    if (!dtb_file) {
+    if (!dtb_file)
+    {
       std::cerr << "auto-generated DTS string";
-    } else {
+    }
+    else
+    {
       std::cerr << "`" << dtb_file << "'";
     }
     std::cerr << ": " << fdt_strerror(fdt_code) << ".\n";
@@ -169,20 +183,23 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
     return;
 
   for (cpu_offset = fdt_get_first_subnode(fdt, cpu_offset); cpu_offset >= 0;
-       cpu_offset = fdt_get_next_subnode(fdt, cpu_offset)) {
+       cpu_offset = fdt_get_next_subnode(fdt, cpu_offset))
+  {
 
     if (!(cpu_map_offset < 0) && cpu_offset == cpu_map_offset)
       continue;
 
-    if (cpu_idx != procs.size()) {
+    if (cpu_idx != procs.size())
+    {
       std::cerr << "Spike only supports contiguous CPU IDs in the DTS" << std::endl;
       exit(1);
     }
 
     // handle isa string
-    const char* isa_str;
+    const char *isa_str;
     rc = fdt_parse_isa(fdt, cpu_offset, &isa_str);
-    if (rc != 0) {
+    if (rc != 0)
+    {
       std::cerr << "core (" << cpu_idx << ") has an invalid or missing 'riscv,isa'\n";
       exit(1);
     }
@@ -190,7 +207,8 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
     // handle hartid
     uint32_t hartid;
     rc = fdt_parse_hartid(fdt, cpu_offset, &hartid);
-    if (rc != 0) {
+    if (rc != 0)
+    {
       std::cerr << "core (" << cpu_idx << ") has an invalid or missing `reg` (hartid)\n";
       exit(1);
     }
@@ -206,33 +224,48 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
       pmp_num = 0;
     procs[cpu_idx]->set_pmp_num(pmp_num);
 
-    if (fdt_parse_pmp_alignment(fdt, cpu_offset, &pmp_granularity) == 0) {
+    if (fdt_parse_pmp_alignment(fdt, cpu_offset, &pmp_granularity) == 0)
+    {
       procs[cpu_idx]->set_pmp_granularity(pmp_granularity);
     }
 
     // handle mmu-type
     const char *mmu_type;
     rc = fdt_parse_mmu_type(fdt, cpu_offset, &mmu_type);
-    if (rc == 0) {
+    if (rc == 0)
+    {
       procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SBARE);
-      if (strncmp(mmu_type, "riscv,sv32", strlen("riscv,sv32")) == 0) {
+      if (strncmp(mmu_type, "riscv,sv32", strlen("riscv,sv32")) == 0)
+      {
         procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SV32);
-      } else if (strncmp(mmu_type, "riscv,sv39", strlen("riscv,sv39")) == 0) {
+      }
+      else if (strncmp(mmu_type, "riscv,sv39", strlen("riscv,sv39")) == 0)
+      {
         procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SV39);
-      } else if (strncmp(mmu_type, "riscv,sv48", strlen("riscv,sv48")) == 0) {
+      }
+      else if (strncmp(mmu_type, "riscv,sv48", strlen("riscv,sv48")) == 0)
+      {
         procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SV48);
-      } else if (strncmp(mmu_type, "riscv,sv57", strlen("riscv,sv57")) == 0) {
+      }
+      else if (strncmp(mmu_type, "riscv,sv57", strlen("riscv,sv57")) == 0)
+      {
         procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SV57);
-      } else if (strncmp(mmu_type, "riscv,sbare", strlen("riscv,sbare")) == 0) {
+      }
+      else if (strncmp(mmu_type, "riscv,sbare", strlen("riscv,sbare")) == 0)
+      {
         // has been set in the beginning
-      } else {
+      }
+      else
+      {
         std::cerr << "core ("
                   << cpu_idx
                   << ") has an invalid 'mmu-type': "
                   << mmu_type << ").\n";
         exit(1);
       }
-    } else {
+    }
+    else
+    {
       procs[cpu_idx]->set_mmu_capability(IMPL_MMU_SBARE);
     }
 
@@ -240,12 +273,14 @@ sim_t::sim_t(const cfg_t *cfg, bool halted,
   }
 
   // must be located after procs/harts are set (devices might use sim_t get_* member functions)
-  for (size_t i = 0; i < device_factories.size(); i++) {
-    const device_factory_t* factory = device_factories[i].first;
-    const std::vector<std::string>& sargs = device_factories[i].second;
+  for (size_t i = 0; i < device_factories.size(); i++)
+  {
+    const device_factory_t *factory = device_factories[i].first;
+    const std::vector<std::string> &sargs = device_factories[i].second;
     reg_t device_base = 0;
-    abstract_device_t* device = factory->parse_from_fdt(fdt, this, &device_base, sargs);
-    if (device) {
+    abstract_device_t *device = factory->parse_from_fdt(fdt, this, &device_base, sargs);
+    if (device)
+    {
       assert(device_base);
       std::shared_ptr<abstract_device_t> dev_ptr(device);
       add_device(device_base, dev_ptr);
@@ -289,16 +324,33 @@ void sim_t::step(size_t n)
     {
       current_step = 0;
       procs[current_proc]->get_mmu()->yield_load_reservation();
+#if 0
       if (++current_proc == procs.size()) {
         current_proc = 0;
         reg_t rtc_ticks = INTERLEAVE / INSNS_PER_RTC_TICK;
         for (auto &dev : devices) dev->tick(rtc_ticks);
       }
+#endif
+      // skip suspending processors
+      do
+      {
+        ++current_proc;
+        if (current_proc == procs.size())
+        {
+          current_proc = 0;
+          reg_t rtc_ticks = INTERLEAVE / INSNS_PER_RTC_TICK;
+          for (auto &dev : devices)
+          {
+            dev->tick(rtc_ticks); // tick all devices
+          }
+        }
+      } while (procs[current_proc]->sm_sched_suspend);
     }
   }
 }
 
-void sim_t::add_device(reg_t addr, std::shared_ptr<abstract_device_t> dev) {
+void sim_t::add_device(reg_t addr, std::shared_ptr<abstract_device_t> dev)
+{
   bus.add_device(addr, dev.get());
   devices.push_back(dev);
 }
@@ -311,7 +363,8 @@ void sim_t::set_debug(bool value)
 void sim_t::set_histogram(bool value)
 {
   histogram_enabled = value;
-  for (size_t i = 0; i < procs.size(); i++) {
+  for (size_t i = 0; i < procs.size(); i++)
+  {
     procs[i]->set_histogram(histogram_enabled);
   }
 }
@@ -323,14 +376,15 @@ void sim_t::configure_log(bool enable_log, bool enable_commitlog)
   if (!enable_commitlog)
     return;
 
-  for (processor_t *proc : procs) {
+  for (processor_t *proc : procs)
+  {
     proc->enable_log_commits();
   }
 }
 
 void sim_t::set_procs_debug(bool value)
 {
-  for (size_t i=0; i< procs.size(); i++)
+  for (size_t i = 0; i < procs.size(); i++)
     procs[i]->set_debug(value);
 }
 
@@ -340,14 +394,14 @@ static bool paddr_ok(reg_t addr)
   return true;
 }
 
-bool sim_t::mmio_load(reg_t paddr, size_t len, uint8_t* bytes)
+bool sim_t::mmio_load(reg_t paddr, size_t len, uint8_t *bytes)
 {
   if (paddr + len < paddr || !paddr_ok(paddr + len - 1))
     return false;
   return bus.load(paddr, len, bytes);
 }
 
-bool sim_t::mmio_store(reg_t paddr, size_t len, const uint8_t* bytes)
+bool sim_t::mmio_store(reg_t paddr, size_t len, const uint8_t *bytes)
 {
   if (paddr + len < paddr || !paddr_ok(paddr + len - 1))
     return false;
@@ -361,18 +415,17 @@ void sim_t::set_rom()
   reg_t start_pc = cfg->start_pc.value_or(get_entry_point());
 
   uint32_t reset_vec[reset_vec_size] = {
-    0x297,                                      // auipc  t0,0x0
-    0x28593 + (reset_vec_size * 4 << 20),       // addi   a1, t0, &dtb
-    0xf1402573,                                 // csrr   a0, mhartid
-    get_core(0)->get_xlen() == 32 ?
-      0x0182a283u :                             // lw     t0,24(t0)
-      0x0182b283u,                              // ld     t0,24(t0)
-    0x28067,                                    // jr     t0
-    0,
-    (uint32_t) (start_pc & 0xffffffff),
-    (uint32_t) (start_pc >> 32)
-  };
-  if (get_target_endianness() == endianness_big) {
+      0x297,                                        // auipc  t0,0x0
+      0x28593 + (reset_vec_size * 4 << 20),         // addi   a1, t0, &dtb
+      0xf1402573,                                   // csrr   a0, mhartid
+      get_core(0)->get_xlen() == 32 ? 0x0182a283u : // lw     t0,24(t0)
+          0x0182b283u,                              // ld     t0,24(t0)
+      0x28067,                                      // jr     t0
+      0,
+      (uint32_t)(start_pc & 0xffffffff),
+      (uint32_t)(start_pc >> 32)};
+  if (get_target_endianness() == endianness_big)
+  {
     int i;
     // Instuctions are little endian
     for (i = 0; reset_vec[i] != 0; i++)
@@ -383,13 +436,15 @@ void sim_t::set_rom()
 
     // Correct the high/low order of 64-bit start PC
     if (get_core(0)->get_xlen() != 32)
-      std::swap(reset_vec[reset_vec_size-2], reset_vec[reset_vec_size-1]);
-  } else {
+      std::swap(reset_vec[reset_vec_size - 2], reset_vec[reset_vec_size - 1]);
+  }
+  else
+  {
     for (int i = 0; i < reset_vec_size; i++)
       reset_vec[i] = to_le(reset_vec[i]);
   }
 
-  std::vector<char> rom((char*)reset_vec, (char*)reset_vec + sizeof(reset_vec));
+  std::vector<char> rom((char *)reset_vec, (char *)reset_vec + sizeof(reset_vec));
 
   rom.insert(rom.end(), dtb.begin(), dtb.end());
   const int align = 0x1000;
@@ -399,17 +454,18 @@ void sim_t::set_rom()
   add_device(DEFAULT_RSTVEC, boot_rom);
 }
 
-char* sim_t::addr_to_mem(reg_t paddr) {
+char *sim_t::addr_to_mem(reg_t paddr)
+{
   if (!paddr_ok(paddr))
     return NULL;
   auto desc = bus.find_device(paddr);
-  if (auto mem = dynamic_cast<abstract_mem_t*>(desc.second))
+  if (auto mem = dynamic_cast<abstract_mem_t *>(desc.second))
     if (paddr - desc.first < mem->size())
       return mem->contents(paddr - desc.first);
   return NULL;
 }
 
-const char* sim_t::get_symbol(uint64_t paddr)
+const char *sim_t::get_symbol(uint64_t paddr)
 {
   return htif_t::get_symbol(paddr);
 }
@@ -436,14 +492,14 @@ void sim_t::idle()
     remote_bitbang->tick();
 }
 
-void sim_t::read_chunk(addr_t taddr, size_t len, void* dst)
+void sim_t::read_chunk(addr_t taddr, size_t len, void *dst)
 {
   assert(len == 8);
   auto data = debug_mmu->to_target(debug_mmu->load<uint64_t>(taddr));
   memcpy(dst, &data, sizeof data);
 }
 
-void sim_t::write_chunk(addr_t taddr, size_t len, const void* src)
+void sim_t::write_chunk(addr_t taddr, size_t len, const void *src)
 {
   assert(len == 8);
   target_endian<uint64_t> data;
@@ -453,7 +509,7 @@ void sim_t::write_chunk(addr_t taddr, size_t len, const void* src)
 
 endianness_t sim_t::get_target_endianness() const
 {
-  return debug_mmu->is_target_big_endian()? endianness_big : endianness_little;
+  return debug_mmu->is_target_big_endian() ? endianness_big : endianness_little;
 }
 
 void sim_t::proc_reset(unsigned id)
