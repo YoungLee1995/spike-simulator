@@ -11,13 +11,13 @@
 
 #define SM_DDR_BASE 0x80000000L  // 2GB
 #define SM_DDR_SIZE 0x180000000L // 6GB
-#define SM_DDR_END (SM_DDR_BASE + SM_DDR_SIZE - 1)
+#define SM_DDR_END (SM_DDR_BASE + SM_DDR_SIZE)
 
 #define SM_L1_BASE 0x40000000                                    // 1GB
 #define SM_L1_NPU_BASE(Core) (SM_L1_BASE + (Core * 0x20000000L)) // 512MB per NPU
 #define SM_L1_NPU_SIZE 0x400000                                  // 4MB
 
-#define SM_MCU_SRAM_BASE 0x3F000000 // 64MB
+#define SM_MCU_SRAM_BASE 0x3F000000L // 64MB
 #define SM_MCU_SRAM_SIZE 0x800000   // 8MB
 
 //---------------------------

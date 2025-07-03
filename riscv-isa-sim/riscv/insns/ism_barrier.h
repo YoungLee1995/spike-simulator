@@ -1,0 +1,1 @@
+sm_do_barrier(p,  insn);

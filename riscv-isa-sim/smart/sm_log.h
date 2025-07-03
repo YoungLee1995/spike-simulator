@@ -2,6 +2,7 @@
  */
 #ifndef SM_LOG_H
 #define SM_LOG_H
+#include <stdio.h>
 
 #define SM_LOG_LEVEL 3
 // #define SM_LOG_DEBUG 4

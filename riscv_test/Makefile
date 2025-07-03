@@ -4,6 +4,7 @@ default: all
 bmarks = \
 		hello \
 		dispatch \
+		llm		\
 		#softmax
 
 src_dir = .

@@ -41,6 +41,8 @@ void sm_dispatch_t::dispatch(int idx)
     processor_t *p = Cores[idx];
     // set thread state
     p->get_state()->pc = (reg_t)Task.PC;
+    for(int i=0;i<8;i++)
+        p->get_state()->XPR.write(i+10,(reg_t)Task.Args[i]);
     // set schedule info
     p->sm_sched_suspend = 0;
     p->sm_exit_code = 0;
