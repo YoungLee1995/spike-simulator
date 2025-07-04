@@ -11,20 +11,28 @@ class sm_dispatch_t;
 class sm_file_t;
 class sm_main_t;
 
-extern sm_main_t* g_sm_main;
-extern void sm_start(sim_t* sim);
+extern sm_main_t *g_sm_main;
+extern void sm_start(sim_t *sim);
 
 class sm_main_t
 {
-sim_t* Sim;
-bus_t* Bus;
-sm_dispatch_t* Dispatch;
-sm_file_t* File;
+    sim_t *Sim;
+    bus_t *Bus;
+    sm_dispatch_t *Dispatch;
+    sm_file_t *File;
 
 public:
-    sm_main_t(sim_t* sim);
+    sm_main_t(sim_t *sim);
 };
 
-
+class sm_npucore_exit_t
+{
+public:
+    unsigned int Ecode;
+    sm_npucore_exit_t(unsigned int ecode)
+    {
+        Ecode = ecode;
+    }
+};
 
 #endif // _smart_h

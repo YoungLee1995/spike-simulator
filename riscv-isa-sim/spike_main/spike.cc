@@ -531,10 +531,10 @@ int main(int argc, char **argv)
   }
   // memory, later align with HW
   cfg.mem_layout.clear();
-  cfg.mem_layout.push_back(mem_cfg_t(0x80000000, 0x180000000)); // 2G~8G
-  cfg.mem_layout.push_back(mem_cfg_t(0x3f000000, 0x800000));    // 1G -16M, 8M
+  cfg.mem_layout.push_back(mem_cfg_t(0x3f000000, 0x800000)); // 1G -16M, 8M
   for (int i = 1; i <= 4; i++)
     cfg.mem_layout.push_back(mem_cfg_t(0x40000000 + i * 0x2000000, 0x400000)); // 1G -16M, 1M
+  cfg.mem_layout.push_back(mem_cfg_t(0x80000000, 0x180000000));                // 2G~8G
 
   std::vector<std::pair<reg_t, abstract_mem_t *>> mems =
       make_mems(cfg.mem_layout);

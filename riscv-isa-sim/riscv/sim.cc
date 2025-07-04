@@ -9,6 +9,7 @@
 #include "platform.h"
 #include "libfdt.h"
 #include "socketif.h"
+#include "smart.h"
 #include <fstream>
 #include <map>
 #include <iostream>
@@ -317,10 +318,21 @@ void sim_t::step(size_t n)
   for (size_t i = 0, steps = 0; i < n; i += steps)
   {
     steps = std::min(n - i, INTERLEAVE - current_step);
-    procs[current_proc]->step(steps);
+    // procs[current_proc]->step(steps);
+    processor_t *p = procs[current_proc];
+    try
+    {
+      p->step(steps);
+    }
+    catch (sm_npucore_exit_t &e)
+    {
+      p->sm_exit_code = e.Ecode;
+      p->sm_dispatch_finish(p);
+      current_step = INTERLEAVE;
+    }
 
     current_step += steps;
-    if (current_step == INTERLEAVE)
+    if (current_step >= INTERLEAVE)
     {
       current_step = 0;
       procs[current_proc]->get_mmu()->yield_load_reservation();

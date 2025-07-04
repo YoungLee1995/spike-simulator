@@ -1,3 +1,4 @@
 *.o
 *.riscv
 *.riscv.dump
+*.map

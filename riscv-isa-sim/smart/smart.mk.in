@@ -3,7 +3,8 @@ smart_subproject_deps = softfloat
 smart_srcs = \
     sm_main.cc\
     sm_insns.cc\
-    sm_dispatch.cc
+    sm_dispatch.cc \
+    sm_file.cc\
 
 smart_install_shared_lib = yes
 

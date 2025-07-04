@@ -8,187 +8,187 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD /tmp/ccNzzYqe.o
-LOAD /tmp/cc1FN0fh.o
-LOAD /tmp/ccT5uqZd.o
-LOAD /tmp/cce8pPhh.o
-LOAD /tmp/ccN4l4df.o
-LOAD /tmp/cc2frwoe.o
+LOAD /tmp/ccxYcPkK.o
+LOAD /tmp/ccu29tUM.o
+LOAD /tmp/ccCTHlKJ.o
+LOAD /tmp/cch3YYhN.o
+LOAD /tmp/cc13wWQL.o
+LOAD /tmp/ccQNtwfM.o
 LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/../../../../riscv64-unknown-elf/lib/libm.a
 LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/libgcc.a
-                0x0000000080000000                . = 0x80000000
+                0x000000003f000000                . = 0x3f000000
 
-.text.init      0x0000000080000000      0x1ca
+.text.init      0x000000003f000000      0x1ca
  *(.text.init)
- .text.init     0x0000000080000000      0x1ca /tmp/cc2frwoe.o
-                0x0000000080000000                _start
-                0x0000000080001000                . = ALIGN (0x1000)
+ .text.init     0x000000003f000000      0x1ca /tmp/ccQNtwfM.o
+                0x000000003f000000                _start
+                0x000000003f001000                . = ALIGN (0x1000)
 
-.tohost         0x0000000080001000       0x48
+.tohost         0x000000003f001000       0x48
  *(.tohost)
- .tohost        0x0000000080001000       0x48 /tmp/cc2frwoe.o
-                0x0000000080001000                tohost
-                0x0000000080001040                fromhost
-                0x0000000080002000                . = ALIGN (0x1000)
+ .tohost        0x000000003f001000       0x48 /tmp/ccQNtwfM.o
+                0x000000003f001000                tohost
+                0x000000003f001040                fromhost
+                0x000000003f002000                . = ALIGN (0x1000)
 
-.text           0x0000000080002000      0xde0
+.text           0x000000003f002000      0xe0e
  *(.text)
- .text          0x0000000080002000       0x96 /tmp/ccNzzYqe.o
-                0x0000000080002000                npu_proc
-                0x000000008000204a                start_npu
- .text          0x0000000080002096      0x210 /tmp/cc1FN0fh.o
-                0x0000000080002096                as_uint
-                0x000000008000209e                as_float
-                0x00000000800020a4                half_to_float
-                0x0000000080002110                float_to_half
-                0x0000000080002150                float_to_half_array
-                0x00000000800021a0                half_to_float_array
-                0x00000000800021da                half_add
-                0x00000000800021fc                half_sub
-                0x000000008000221e                half_mul
-                0x0000000080002240                half_div
-                0x0000000080002262                half_min
-                0x0000000080002284                half_max
- .text          0x00000000800022a6       0xde /tmp/ccT5uqZd.o
-                0x00000000800022a6                open
-                0x00000000800022d0                close
-                0x00000000800022ee                lseek
-                0x0000000080002320                read
-                0x0000000080002352                write
- .text          0x0000000080002384      0x92e /tmp/cce8pPhh.o
-                0x00000000800023ec                putchar
-                0x0000000080002900                setStats
-                0x000000008000293a                tohost_exit
-                0x000000008000294c                handle_trap
-                0x000000008000295c                exit
-                0x0000000080002964                printstr
-                0x000000008000297c                thread_entry
-                0x0000000080002982                printhex
-                0x00000000800029c2                printf
-                0x00000000800029f4                sprintf
-                0x0000000080002a34                memcpy
-                0x0000000080002ae0                memset
-                0x0000000080002b26                _init
-                0x0000000080002bba                strlen
-                0x0000000080002bd4                strnlen
-                0x0000000080002bf4                strcmp
-                0x0000000080002c10                strcpy
-                0x0000000080002c22                atol
- .text          0x0000000080002cb2      0x12e /tmp/ccN4l4df.o
-                0x0000000080002cec                malloc_stats
-                0x0000000080002d2e                malloc
-                0x0000000080002d96                free
-                0x0000000080002dda                init_malloc
- .text          0x0000000080002de0        0x0 /tmp/cc2frwoe.o
+ .text          0x000000003f002000       0xb8 /tmp/ccxYcPkK.o
+                0x000000003f002000                npu_proc
+                0x000000003f00206a                start_npu
+ .text          0x000000003f0020b8      0x210 /tmp/ccu29tUM.o
+                0x000000003f0020b8                as_uint
+                0x000000003f0020c0                as_float
+                0x000000003f0020c6                half_to_float
+                0x000000003f002132                float_to_half
+                0x000000003f002172                float_to_half_array
+                0x000000003f0021c2                half_to_float_array
+                0x000000003f0021fc                half_add
+                0x000000003f00221e                half_sub
+                0x000000003f002240                half_mul
+                0x000000003f002262                half_div
+                0x000000003f002284                half_min
+                0x000000003f0022a6                half_max
+ .text          0x000000003f0022c8       0xb2 /tmp/ccCTHlKJ.o
+                0x000000003f0022c8                open
+                0x000000003f0022ee                close
+                0x000000003f002308                lseek
+                0x000000003f00232e                read
+                0x000000003f002354                write
+ .text          0x000000003f00237a      0x966 /tmp/cch3YYhN.o
+                0x000000003f0023e2                putchar
+                0x000000003f0028f6                setStats
+                0x000000003f002930                tohost_exit
+                0x000000003f002942                handle_trap
+                0x000000003f002952                exit
+                0x000000003f00295a                printstr
+                0x000000003f002972                thread_entry
+                0x000000003f002978                printhex
+                0x000000003f0029b8                printf
+                0x000000003f0029ea                sprintf
+                0x000000003f002a2a                memcpy
+                0x000000003f002ad6                memset
+                0x000000003f002b1c                _init
+                0x000000003f002bb6                strlen
+                0x000000003f002bd0                strnlen
+                0x000000003f002bf0                strcmp
+                0x000000003f002c0c                strcpy
+                0x000000003f002c1e                atol
+ .text          0x000000003f002ce0      0x12e /tmp/cc13wWQL.o
+                0x000000003f002d1a                malloc_stats
+                0x000000003f002d5c                malloc
+                0x000000003f002dc4                free
+                0x000000003f002e08                init_malloc
+ .text          0x000000003f002e0e        0x0 /tmp/ccQNtwfM.o
 
-.text.startup   0x0000000080002de0       0x9a
- .text.startup  0x0000000080002de0       0x62 /tmp/ccNzzYqe.o
-                0x0000000080002de0                main
- .text.startup  0x0000000080002e42       0x38 /tmp/cce8pPhh.o
+.text.startup   0x000000003f002e0e       0x9a
+ .text.startup  0x000000003f002e0e       0x62 /tmp/ccxYcPkK.o
+                0x000000003f002e0e                main
+ .text.startup  0x000000003f002e70       0x38 /tmp/cch3YYhN.o
 
-.text.unlikely  0x0000000080002e7a        0xe
+.text.unlikely  0x000000003f002ea8        0xe
  .text.unlikely
-                0x0000000080002e7a        0xe /tmp/cce8pPhh.o
-                0x0000000080002e7a                abort
+                0x000000003f002ea8        0xe /tmp/cch3YYhN.o
+                0x000000003f002ea8                abort
 
-.data           0x0000000080002e88       0x10
+.data           0x000000003f002eb8       0x10
  *(.data)
- .data          0x0000000080002e88       0x10 /tmp/ccNzzYqe.o
-                0x0000000080002e88                g_busys
- .data          0x0000000080002e98        0x0 /tmp/cc1FN0fh.o
- .data          0x0000000080002e98        0x0 /tmp/ccT5uqZd.o
- .data          0x0000000080002e98        0x0 /tmp/cce8pPhh.o
- .data          0x0000000080002e98        0x0 /tmp/ccN4l4df.o
- .data          0x0000000080002e98        0x0 /tmp/cc2frwoe.o
+ .data          0x000000003f002eb8       0x10 /tmp/ccxYcPkK.o
+                0x000000003f002eb8                g_busys
+ .data          0x000000003f002ec8        0x0 /tmp/ccu29tUM.o
+ .data          0x000000003f002ec8        0x0 /tmp/ccCTHlKJ.o
+ .data          0x000000003f002ec8        0x0 /tmp/cch3YYhN.o
+ .data          0x000000003f002ec8        0x0 /tmp/cc13wWQL.o
+ .data          0x000000003f002ec8        0x0 /tmp/ccQNtwfM.o
 
-.sdata          0x0000000080002e98        0x8
-                0x0000000080003698                __global_pointer$ = (. + 0x800)
+.sdata          0x000000003f002ec8        0x8
+                0x000000003f0036c8                __global_pointer$ = (. + 0x800)
  *(.srodata.cst16)
  *(.srodata.cst8)
  *(.srodata.cst4)
- .srodata.cst4  0x0000000080002e98        0x8 /tmp/cce8pPhh.o
+ .srodata.cst4  0x000000003f002ec8        0x8 /tmp/cch3YYhN.o
  *(.srodata.cst2)
  *(.srodata)
  *(.sdata .sdata* .gnu.linkonce.s.*)
 
-.rodata.str1.8  0x0000000080002ea0      0x148
+.rodata.str1.8  0x000000003f002ed0      0x148
  .rodata.str1.8
-                0x0000000080002ea0      0x148 /tmp/ccNzzYqe.o
-                                         0x77 (size before relaxing)
+                0x000000003f002ed0      0x148 /tmp/ccxYcPkK.o
+                                         0x72 (size before relaxing)
  .rodata.str1.8
-                0x0000000080002fe8       0x61 /tmp/cce8pPhh.o
+                0x000000003f003018       0x61 /tmp/cch3YYhN.o
  .rodata.str1.8
-                0x0000000080002fe8       0x60 /tmp/ccN4l4df.o
+                0x000000003f003018       0x60 /tmp/cc13wWQL.o
 
-.rodata         0x0000000080002fe8      0x158
- .rodata        0x0000000080002fe8      0x158 /tmp/cce8pPhh.o
+.rodata         0x000000003f003018      0x158
+ .rodata        0x000000003f003018      0x158 /tmp/cch3YYhN.o
 
-.rela.dyn       0x0000000080003140        0x0
- .rela.text     0x0000000080003140        0x0 /tmp/ccNzzYqe.o
+.rela.dyn       0x000000003f003170        0x0
+ .rela.text     0x000000003f003170        0x0 /tmp/ccxYcPkK.o
  .rela.text.init
-                0x0000000080003140        0x0 /tmp/ccNzzYqe.o
+                0x000000003f003170        0x0 /tmp/ccxYcPkK.o
 
-.sbss           0x0000000080003140       0x10
+.sbss           0x000000003f003170       0x10
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
- .sbss          0x0000000080003140        0x4 /tmp/cce8pPhh.o
-                0x0000000080003140                syscall_lock
- *fill*         0x0000000080003144        0x4 
- .sbss          0x0000000080003148        0x8 /tmp/ccN4l4df.o
+ .sbss          0x000000003f003170        0x4 /tmp/cch3YYhN.o
+                0x000000003f003170                syscall_lock
+ *fill*         0x000000003f003174        0x4 
+ .sbss          0x000000003f003178        0x8 /tmp/cc13wWQL.o
  *(.scommon)
 
-.bss            0x0000000080003150       0x20
+.bss            0x000000003f003180       0x20
  *(.bss)
- .bss           0x0000000080003150        0x0 /tmp/ccNzzYqe.o
- .bss           0x0000000080003150        0x0 /tmp/cc1FN0fh.o
- .bss           0x0000000080003150        0x0 /tmp/ccT5uqZd.o
- .bss           0x0000000080003150       0x20 /tmp/cce8pPhh.o
- .bss           0x0000000080003170        0x0 /tmp/ccN4l4df.o
- .bss           0x0000000080003170        0x0 /tmp/cc2frwoe.o
+ .bss           0x000000003f003180        0x0 /tmp/ccxYcPkK.o
+ .bss           0x000000003f003180        0x0 /tmp/ccu29tUM.o
+ .bss           0x000000003f003180        0x0 /tmp/ccCTHlKJ.o
+ .bss           0x000000003f003180       0x20 /tmp/cch3YYhN.o
+ .bss           0x000000003f0031a0        0x0 /tmp/cc13wWQL.o
+ .bss           0x000000003f0031a0        0x0 /tmp/ccQNtwfM.o
 
-.tdata          0x0000000080003170        0x0
-                0x0000000080003170                _tdata_begin = .
+.tdata          0x000000003f0031a0        0x0
+                0x000000003f0031a0                _tdata_begin = .
  *(.tdata)
-                0x0000000080003170                _tdata_end = .
+                0x000000003f0031a0                _tdata_end = .
 
-.tbss           0x0000000080003180       0x44
+.tbss           0x000000003f0031c0       0x44
  *(.tbss)
- .tbss          0x0000000080003180       0x44 /tmp/cce8pPhh.o
-                0x00000000800031c4                _tbss_end = .
-                0x0000000080003180                _end = .
+ .tbss          0x000000003f0031c0       0x44 /tmp/cch3YYhN.o
+                0x000000003f003204                _tbss_end = .
+                0x000000003f0031c0                _end = .
 OUTPUT(llm.riscv elf64-littleriscv)
 
 .comment        0x0000000000000000       0x1b
- .comment       0x0000000000000000       0x1b /tmp/ccNzzYqe.o
+ .comment       0x0000000000000000       0x1b /tmp/ccxYcPkK.o
                                          0x1c (size before relaxing)
- .comment       0x000000000000001b       0x1c /tmp/cc1FN0fh.o
- .comment       0x000000000000001b       0x1c /tmp/ccT5uqZd.o
- .comment       0x000000000000001b       0x1c /tmp/cce8pPhh.o
- .comment       0x000000000000001b       0x1c /tmp/ccN4l4df.o
+ .comment       0x000000000000001b       0x1c /tmp/ccu29tUM.o
+ .comment       0x000000000000001b       0x1c /tmp/ccCTHlKJ.o
+ .comment       0x000000000000001b       0x1c /tmp/cch3YYhN.o
+ .comment       0x000000000000001b       0x1c /tmp/cc13wWQL.o
 
 .note.GNU-stack
                 0x0000000000000000        0x0
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccNzzYqe.o
+                0x0000000000000000        0x0 /tmp/ccxYcPkK.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/cc1FN0fh.o
+                0x0000000000000000        0x0 /tmp/ccu29tUM.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccT5uqZd.o
+                0x0000000000000000        0x0 /tmp/ccCTHlKJ.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/cce8pPhh.o
+                0x0000000000000000        0x0 /tmp/cch3YYhN.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccN4l4df.o
+                0x0000000000000000        0x0 /tmp/cc13wWQL.o
 
 .riscv.attributes
                 0x0000000000000000       0x6c
  .riscv.attributes
-                0x0000000000000000       0x6c /tmp/ccNzzYqe.o
+                0x0000000000000000       0x6c /tmp/ccxYcPkK.o
  .riscv.attributes
-                0x000000000000006c       0x68 /tmp/cc1FN0fh.o
+                0x000000000000006c       0x68 /tmp/ccu29tUM.o
  .riscv.attributes
-                0x00000000000000d4       0x68 /tmp/ccT5uqZd.o
+                0x00000000000000d4       0x68 /tmp/ccCTHlKJ.o
  .riscv.attributes
-                0x000000000000013c       0x6c /tmp/cce8pPhh.o
+                0x000000000000013c       0x6c /tmp/cch3YYhN.o
  .riscv.attributes
-                0x00000000000001a8       0x68 /tmp/ccN4l4df.o
+                0x00000000000001a8       0x68 /tmp/cc13wWQL.o
  .riscv.attributes
-                0x0000000000000210       0x6a /tmp/cc2frwoe.o
+                0x0000000000000210       0x6a /tmp/ccQNtwfM.o

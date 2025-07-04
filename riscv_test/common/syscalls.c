@@ -123,7 +123,10 @@ void _init(int cid, int nc)
     init_tls();
     thread_entry(cid, nc);
 
-    int ret = main(0, 0);
+    // only single-threaded programs should ever get here
+    uint64_t *P = (uint64_t *)(0x3f000000UL + 0x800000 - 0x1000); // 4k
+    int argc = *(int *)P++;
+    int ret = main(argc, (char **)P);
 
     char buf[NUM_COUNTERS * 32] __attribute__((aligned(64)));
     char *pbuf = buf;
@@ -577,21 +580,36 @@ long atol(const char *str)
         str++;
 
     // Handle sign
-    if (*str == '-')
+    if (*str == '-' || *str == '+')
     {
-        sign = -1;
-        str++;
-    }
-    else if (*str == '+')
-    {
+        sign = *str == '-';
         str++;
     }
 
-    // Convert digits
-    while (*str >= '0' && *str <= '9')
+    if (str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
     {
-        result = result * 10 + (*str - '0');
-        str++;
+        str += 2;
+        while (*str)
+        {
+            result *= 16;
+            if (*str >= '0' && *str <= '9')
+                result += *str - '0';
+            else if (*str >= 'a' && *str <= 'f')
+                result += *str - 'a' + 10;
+            else if (*str >= 'A' && *str <= 'F')
+                result += *str - 'A' + 10;
+            else
+                return 0;
+            str++;
+        }
+        return sign * result;
+    }
+
+    // Convert digits
+    while (*str)
+    {
+        result *= 10;
+        result += *str - '0';
     }
 
     return sign * result;

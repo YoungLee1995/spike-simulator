@@ -29,8 +29,16 @@ sm_dispatch_t::sm_dispatch_t(sim_t *sim)
         {
             // suspend the core
             p->sm_sched_suspend = 1;
-            Busys[i] = true;
+            Busys[i] = false;
             Exit_codes[i] = p->sm_exit_code;
+            if (p->sm_exit_code)
+            {
+                sm_log_warn("Dispatch: Core%x exit, exit_code = %x", i, Exit_codes[i]);
+            }
+            else
+            {
+                sm_log_info("Dispatch: Core%x exit, exit_code = %x", i, Exit_codes[i]);
+            }
             sm_log_info("Dispatch: core %x finished, exit code = %x", i, Exit_codes[i]);
         };
     }
@@ -41,8 +49,8 @@ void sm_dispatch_t::dispatch(int idx)
     processor_t *p = Cores[idx];
     // set thread state
     p->get_state()->pc = (reg_t)Task.PC;
-    for(int i=0;i<8;i++)
-        p->get_state()->XPR.write(i+10,(reg_t)Task.Args[i]);
+    for (int i = 0; i < 8; i++)
+        p->get_state()->XPR.write(i + 10, (reg_t)Task.Args[i]);
     // set schedule info
     p->sm_sched_suspend = 0;
     p->sm_exit_code = 0;
@@ -100,6 +108,18 @@ bool sm_dispatch_t::store(reg_t addr, size_t len, const uint8_t *bytes)
             dispatch(i);
         }
     }
+
+    else if (addr >= SM_DISPATCH_ECODE_BEGIN && addr < SM_DISPATCH_ECODE_END)
+    {
+        int c = (addr - SM_DISPATCH_ECODE_BEGIN) / 4;
+        if (!Busys[c])
+        {
+            sm_log_error("NPU Core%d not stated.", c);
+            return false;
+            throw sm_npucore_exit_t(*(U32 *)p);
+        }
+    }
+
     else if (addr == SM_DISPATCH_PC)
     {
         Task.PC = *p;

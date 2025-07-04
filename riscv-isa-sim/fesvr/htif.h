@@ -107,6 +107,7 @@ class htif_t : public chunked_memif_t
 
   friend class memif_t;
   friend class syscall_t;
+  friend class sm_main_t;
 };
 
 /* Alignment guide for emulator.cc options:
