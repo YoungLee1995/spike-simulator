@@ -1,5 +1,10 @@
 #include "processor.h"
 #include "sm_log.h"
+#include "decode_macros.h"
+#include "simif.h"
+#include "sm_barrier.h"
+#include "sm_common.h"
+#include "smart.h"
 
 int sm_do_barrier(processor_t *p, insn_t insn)
 {

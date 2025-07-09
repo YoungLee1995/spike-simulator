@@ -369,6 +369,8 @@ public:
 
   void check_if_lpad_required();
 
+  simif_t *get_simif(){return sim;}
+
 private:
   const isa_parser_t isa;
   const cfg_t * const cfg;
