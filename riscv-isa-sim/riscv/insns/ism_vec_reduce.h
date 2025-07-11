@@ -1,0 +1,1 @@
+sm_do_vec_reduce(p, insn);

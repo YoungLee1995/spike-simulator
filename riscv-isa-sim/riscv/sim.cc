@@ -315,50 +315,37 @@ int sim_t::run()
 
 void sim_t::step(size_t n)
 {
-  for (size_t i = 0, steps = 0; i < n; i += steps)
+  static size_t ncycle = 0;
+  for (size_t i = 0; i < n; i++)
   {
-    steps = std::min(n - i, INTERLEAVE - current_step);
-    // procs[current_proc]->step(steps);
-    processor_t *p = procs[current_proc];
-    try
+    for (size_t j = 0; j < procs.size(); i++)
     {
-      p->step(steps);
-    }
-    catch (sm_npucore_exit_t &e)
-    {
-      p->sm_exit_code = e.Ecode;
-      p->sm_dispatch_finish(p);
-      current_step = INTERLEAVE;
-    }
-
-    current_step += steps;
-    if (current_step >= INTERLEAVE)
-    {
-      current_step = 0;
-      procs[current_proc]->get_mmu()->yield_load_reservation();
-#if 0
-      if (++current_proc == procs.size()) {
-        current_proc = 0;
-        reg_t rtc_ticks = INTERLEAVE / INSNS_PER_RTC_TICK;
-        for (auto &dev : devices) dev->tick(rtc_ticks);
-      }
-#endif
-      // skip suspending processors
-      do
+      processor_t *p = procs[j];
+      try
       {
-        ++current_proc;
-        if (current_proc == procs.size())
+        if (!p->sm_sched_suspend)
         {
-          current_proc = 0;
-          reg_t rtc_ticks = INTERLEAVE / INSNS_PER_RTC_TICK;
-          for (auto &dev : devices)
-          {
-            dev->tick(rtc_ticks); // tick all devices
-          }
+          p->step(1);
+          p->get_mmu()->yield_load_reservation();
         }
-      } while (procs[current_proc]->sm_sched_suspend);
+      }
+      catch (sm_npucore_exit_t &e)
+      {
+        p->sm_sched_suspend = true;
+        p->get_state()->pc += 4;
+      }
+      catch (sm_npucore_barrier_t &e)
+      {
+        p->sm_sched_suspend = true;
+      }
+    }
+    for (size_t p = 1; p < procs.size(); p++)
+    {
+      procs[p]->sm_main.tick(ncycle++);
     }
   }
+  reg_t rtc_ticks=std::max(INTERLEAVE,n)/INSNS_PER_RTC_TICK;
+  for(auto &dev:devices) dev->tick(rtc_ticks);
 }
 
 void sim_t::add_device(reg_t addr, std::shared_ptr<abstract_device_t> dev)

@@ -29,6 +29,8 @@ class simif_t;
 class trap_t;
 class extension_t;
 class disassembler_t;
+class sm_main_t;
+class sm_schedule_t;
 
 reg_t illegal_instruction(processor_t* p, insn_t insn, reg_t pc);
 
@@ -441,6 +443,8 @@ public:
   bool sm_sched_suspend=0;
   uint32_t sm_exit_code;
   std::function<void(processor_t*)> sm_dispatch_finish;
+  sm_main_t *sm_main;
+  sm_schedule_t *sm_scheduler;
 };
 
 #endif

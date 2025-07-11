@@ -1,0 +1,1 @@
+sm_do_dma_cp(p, insn);

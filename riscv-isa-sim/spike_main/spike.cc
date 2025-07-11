@@ -9,6 +9,7 @@
 #include "cachesim.h"
 #include "extension.h"
 #include "smart.h"
+#include "sm_regs.h"
 #include <dlfcn.h>
 #include <fesvr/option_parser.h>
 #include <stdexcept>
@@ -520,8 +521,33 @@ int main(int argc, char **argv)
   // liyang date: 2025-07-01
   if (!cfg.isa)
   {
-    cfg.isa = "rv64imafdcv";
+    cfg.isa = "rv64imafdcv_zvl1024b_zve64d";
   }
+  const char *pre_isa = "--isa=";
+  size_t pre_len = strlen(pre_isa);
+  const char *arg_v = argv1[0];
+  if (strncmp(arg_v, pre_isa, pre_len) == 0)
+  {
+    const char *v_start = arg_v + pre_len;
+    const char *space = strchr(v_start, ' ');
+    size_t len = space ? (space - v_start) : strlen(v_start);
+    char *cfg_str = new (std::nothrow) char[len + 1];
+    if (cfg_str)
+    {
+      strncpy(cfg_str, v_start, len);
+      cfg_str[len] = '\0';
+    }
+    cfg.isa = cfg_str;
+  }
+  // self-def isa
+  auto end = cfg.isa;
+  do
+    ++end;
+  while (*end && *end != '\0');
+  auto isa_str = std::string(cfg.isa, end);
+  if (isa_str == DEFAULT_ISA)
+    cfg.isa = "rv64imafdcv_zvl1024b_zve64d";
+  fprintf(stdout, "SELF RISCV ISA simulator:%s\n", cfg.isa);
   // hartid
   cfg.explicit_hartids = true;
   cfg.hartids.clear();
@@ -531,10 +557,12 @@ int main(int argc, char **argv)
   }
   // memory, later align with HW
   cfg.mem_layout.clear();
-  cfg.mem_layout.push_back(mem_cfg_t(0x3f000000, 0x800000)); // 1G -16M, 8M
-  for (int i = 1; i <= 4; i++)
-    cfg.mem_layout.push_back(mem_cfg_t(0x40000000 + i * 0x2000000, 0x400000)); // 1G -16M, 1M
-  cfg.mem_layout.push_back(mem_cfg_t(0x80000000, 0x180000000));                // 2G~8G
+  cfg.mem_layout.push_back(mem_cfg_t(SM_MCU_SRAM_BASE, SM_MCU_SRAM_SIZE)); // 8M
+  for (int i = SM_HARTID_NPU0; i <= SM_HARTID_NPUMAX; i++)
+    cfg.mem_layout.push_back(mem_cfg_t(SM_L1_NPU_BASE(i - SM_HARTID_NPU0), SM_L1_NPU_SIZE)); // 1G -16M, 1M
+  cfg.mem_layout.push_back(mem_cfg_t(SM_NPU_DBG_BASE, SM_NPU_DBG_SIZE));                     // debug
+  cfg.mem_layout.push_back(mem_cfg_t(SM_DDR0_BASE, SM_DDR0_SIZE));
+  cfg.mem_layout.push_back(mem_cfg_t(SM_DDR1_BASE, SM_DDR1_SIZE));
 
   std::vector<std::pair<reg_t, abstract_mem_t *>> mems =
       make_mems(cfg.mem_layout);

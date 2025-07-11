@@ -35,4 +35,25 @@ public:
     }
 };
 
+class sm_npucore_barrier_t
+{
+public:
+    unsigned int Ecode;
+    sm_npucore_barrier_t(unsigned int ecode)
+    {
+        Ecode = ecode;
+    }
+};
+
+class sm_npucore_full_t
+{
+public:
+    unsigned int Ecode;
+    sm_npucore_full_t(unsigned int ecode)
+    {
+        Ecode = ecode;
+    }
+};
+
+
 #endif // _smart_h

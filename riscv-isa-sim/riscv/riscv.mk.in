@@ -1094,8 +1094,22 @@ riscv_insn_ext_zvk = \
 
 riscv_insn_ext_smart=	\
 	 ism_barrier 	\
+	 ism_ddep_gen	\
+	 ism_ddep_rls	\
+	 ism_ddep_use	\
+	 ism_dma_cp		\
+	 ism_dma_ls		\
+	 ism_rope		\
+	 ism_layernorm	\
 	 ism_rmsnorm 	\
+	 ism_softmax	\
+	 ism_vec_reduce	\
+	 ism_vec_sfu	\
+	 ism_vec_elementwise	\
+	 ism_vec_quantize	\
+	 ism_tconv		\
 	 ism_tensor 	\
+
 
 
 

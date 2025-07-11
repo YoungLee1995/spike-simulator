@@ -8,35 +8,35 @@ Name             Origin             Length             Attributes
 
 Linker script and memory map
 
-LOAD /tmp/ccxYcPkK.o
-LOAD /tmp/ccu29tUM.o
-LOAD /tmp/ccCTHlKJ.o
-LOAD /tmp/cch3YYhN.o
-LOAD /tmp/cc13wWQL.o
-LOAD /tmp/ccQNtwfM.o
+LOAD /tmp/cca2v1ii.o
+LOAD /tmp/cc3HWOoh.o
+LOAD /tmp/cctNYyxi.o
+LOAD /tmp/ccnnbv7e.o
+LOAD /tmp/cc0SYpZf.o
+LOAD /tmp/cc2rytig.o
 LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/../../../../riscv64-unknown-elf/lib/libm.a
 LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/libgcc.a
                 0x000000003f000000                . = 0x3f000000
 
 .text.init      0x000000003f000000      0x1ca
  *(.text.init)
- .text.init     0x000000003f000000      0x1ca /tmp/ccQNtwfM.o
+ .text.init     0x000000003f000000      0x1ca /tmp/cc2rytig.o
                 0x000000003f000000                _start
                 0x000000003f001000                . = ALIGN (0x1000)
 
 .tohost         0x000000003f001000       0x48
  *(.tohost)
- .tohost        0x000000003f001000       0x48 /tmp/ccQNtwfM.o
+ .tohost        0x000000003f001000       0x48 /tmp/cc2rytig.o
                 0x000000003f001000                tohost
                 0x000000003f001040                fromhost
                 0x000000003f002000                . = ALIGN (0x1000)
 
 .text           0x000000003f002000      0xe0e
  *(.text)
- .text          0x000000003f002000       0xb8 /tmp/ccxYcPkK.o
+ .text          0x000000003f002000       0xb8 /tmp/cca2v1ii.o
                 0x000000003f002000                npu_proc
                 0x000000003f00206a                start_npu
- .text          0x000000003f0020b8      0x210 /tmp/ccu29tUM.o
+ .text          0x000000003f0020b8      0x210 /tmp/cc3HWOoh.o
                 0x000000003f0020b8                as_uint
                 0x000000003f0020c0                as_float
                 0x000000003f0020c6                half_to_float
@@ -49,13 +49,13 @@ LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/libgcc.a
                 0x000000003f002262                half_div
                 0x000000003f002284                half_min
                 0x000000003f0022a6                half_max
- .text          0x000000003f0022c8       0xb2 /tmp/ccCTHlKJ.o
+ .text          0x000000003f0022c8       0xb2 /tmp/cctNYyxi.o
                 0x000000003f0022c8                open
                 0x000000003f0022ee                close
                 0x000000003f002308                lseek
                 0x000000003f00232e                read
                 0x000000003f002354                write
- .text          0x000000003f00237a      0x966 /tmp/cch3YYhN.o
+ .text          0x000000003f00237a      0x966 /tmp/ccnnbv7e.o
                 0x000000003f0023e2                putchar
                 0x000000003f0028f6                setStats
                 0x000000003f002930                tohost_exit
@@ -74,76 +74,76 @@ LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/libgcc.a
                 0x000000003f002bf0                strcmp
                 0x000000003f002c0c                strcpy
                 0x000000003f002c1e                atol
- .text          0x000000003f002ce0      0x12e /tmp/cc13wWQL.o
+ .text          0x000000003f002ce0      0x12e /tmp/cc0SYpZf.o
                 0x000000003f002d1a                malloc_stats
                 0x000000003f002d5c                malloc
                 0x000000003f002dc4                free
                 0x000000003f002e08                init_malloc
- .text          0x000000003f002e0e        0x0 /tmp/ccQNtwfM.o
+ .text          0x000000003f002e0e        0x0 /tmp/cc2rytig.o
 
 .text.startup   0x000000003f002e0e       0x9a
- .text.startup  0x000000003f002e0e       0x62 /tmp/ccxYcPkK.o
+ .text.startup  0x000000003f002e0e       0x62 /tmp/cca2v1ii.o
                 0x000000003f002e0e                main
- .text.startup  0x000000003f002e70       0x38 /tmp/cch3YYhN.o
+ .text.startup  0x000000003f002e70       0x38 /tmp/ccnnbv7e.o
 
 .text.unlikely  0x000000003f002ea8        0xe
  .text.unlikely
-                0x000000003f002ea8        0xe /tmp/cch3YYhN.o
+                0x000000003f002ea8        0xe /tmp/ccnnbv7e.o
                 0x000000003f002ea8                abort
 
 .data           0x000000003f002eb8       0x10
  *(.data)
- .data          0x000000003f002eb8       0x10 /tmp/ccxYcPkK.o
+ .data          0x000000003f002eb8       0x10 /tmp/cca2v1ii.o
                 0x000000003f002eb8                g_busys
- .data          0x000000003f002ec8        0x0 /tmp/ccu29tUM.o
- .data          0x000000003f002ec8        0x0 /tmp/ccCTHlKJ.o
- .data          0x000000003f002ec8        0x0 /tmp/cch3YYhN.o
- .data          0x000000003f002ec8        0x0 /tmp/cc13wWQL.o
- .data          0x000000003f002ec8        0x0 /tmp/ccQNtwfM.o
+ .data          0x000000003f002ec8        0x0 /tmp/cc3HWOoh.o
+ .data          0x000000003f002ec8        0x0 /tmp/cctNYyxi.o
+ .data          0x000000003f002ec8        0x0 /tmp/ccnnbv7e.o
+ .data          0x000000003f002ec8        0x0 /tmp/cc0SYpZf.o
+ .data          0x000000003f002ec8        0x0 /tmp/cc2rytig.o
 
 .sdata          0x000000003f002ec8        0x8
                 0x000000003f0036c8                __global_pointer$ = (. + 0x800)
  *(.srodata.cst16)
  *(.srodata.cst8)
  *(.srodata.cst4)
- .srodata.cst4  0x000000003f002ec8        0x8 /tmp/cch3YYhN.o
+ .srodata.cst4  0x000000003f002ec8        0x8 /tmp/ccnnbv7e.o
  *(.srodata.cst2)
  *(.srodata)
  *(.sdata .sdata* .gnu.linkonce.s.*)
 
 .rodata.str1.8  0x000000003f002ed0      0x148
  .rodata.str1.8
-                0x000000003f002ed0      0x148 /tmp/ccxYcPkK.o
+                0x000000003f002ed0      0x148 /tmp/cca2v1ii.o
                                          0x72 (size before relaxing)
  .rodata.str1.8
-                0x000000003f003018       0x61 /tmp/cch3YYhN.o
+                0x000000003f003018       0x61 /tmp/ccnnbv7e.o
  .rodata.str1.8
-                0x000000003f003018       0x60 /tmp/cc13wWQL.o
+                0x000000003f003018       0x60 /tmp/cc0SYpZf.o
 
 .rodata         0x000000003f003018      0x158
- .rodata        0x000000003f003018      0x158 /tmp/cch3YYhN.o
+ .rodata        0x000000003f003018      0x158 /tmp/ccnnbv7e.o
 
 .rela.dyn       0x000000003f003170        0x0
- .rela.text     0x000000003f003170        0x0 /tmp/ccxYcPkK.o
+ .rela.text     0x000000003f003170        0x0 /tmp/cca2v1ii.o
  .rela.text.init
-                0x000000003f003170        0x0 /tmp/ccxYcPkK.o
+                0x000000003f003170        0x0 /tmp/cca2v1ii.o
 
 .sbss           0x000000003f003170       0x10
  *(.sbss .sbss.* .gnu.linkonce.sb.*)
- .sbss          0x000000003f003170        0x4 /tmp/cch3YYhN.o
+ .sbss          0x000000003f003170        0x4 /tmp/ccnnbv7e.o
                 0x000000003f003170                syscall_lock
  *fill*         0x000000003f003174        0x4 
- .sbss          0x000000003f003178        0x8 /tmp/cc13wWQL.o
+ .sbss          0x000000003f003178        0x8 /tmp/cc0SYpZf.o
  *(.scommon)
 
 .bss            0x000000003f003180       0x20
  *(.bss)
- .bss           0x000000003f003180        0x0 /tmp/ccxYcPkK.o
- .bss           0x000000003f003180        0x0 /tmp/ccu29tUM.o
- .bss           0x000000003f003180        0x0 /tmp/ccCTHlKJ.o
- .bss           0x000000003f003180       0x20 /tmp/cch3YYhN.o
- .bss           0x000000003f0031a0        0x0 /tmp/cc13wWQL.o
- .bss           0x000000003f0031a0        0x0 /tmp/ccQNtwfM.o
+ .bss           0x000000003f003180        0x0 /tmp/cca2v1ii.o
+ .bss           0x000000003f003180        0x0 /tmp/cc3HWOoh.o
+ .bss           0x000000003f003180        0x0 /tmp/cctNYyxi.o
+ .bss           0x000000003f003180       0x20 /tmp/ccnnbv7e.o
+ .bss           0x000000003f0031a0        0x0 /tmp/cc0SYpZf.o
+ .bss           0x000000003f0031a0        0x0 /tmp/cc2rytig.o
 
 .tdata          0x000000003f0031a0        0x0
                 0x000000003f0031a0                _tdata_begin = .
@@ -152,43 +152,43 @@ LOAD /opt/riscv-vector/lib/gcc/riscv64-unknown-elf/15.1.0/libgcc.a
 
 .tbss           0x000000003f0031c0       0x44
  *(.tbss)
- .tbss          0x000000003f0031c0       0x44 /tmp/cch3YYhN.o
+ .tbss          0x000000003f0031c0       0x44 /tmp/ccnnbv7e.o
                 0x000000003f003204                _tbss_end = .
                 0x000000003f0031c0                _end = .
 OUTPUT(llm.riscv elf64-littleriscv)
 
 .comment        0x0000000000000000       0x1b
- .comment       0x0000000000000000       0x1b /tmp/ccxYcPkK.o
+ .comment       0x0000000000000000       0x1b /tmp/cca2v1ii.o
                                          0x1c (size before relaxing)
- .comment       0x000000000000001b       0x1c /tmp/ccu29tUM.o
- .comment       0x000000000000001b       0x1c /tmp/ccCTHlKJ.o
- .comment       0x000000000000001b       0x1c /tmp/cch3YYhN.o
- .comment       0x000000000000001b       0x1c /tmp/cc13wWQL.o
+ .comment       0x000000000000001b       0x1c /tmp/cc3HWOoh.o
+ .comment       0x000000000000001b       0x1c /tmp/cctNYyxi.o
+ .comment       0x000000000000001b       0x1c /tmp/ccnnbv7e.o
+ .comment       0x000000000000001b       0x1c /tmp/cc0SYpZf.o
 
 .note.GNU-stack
                 0x0000000000000000        0x0
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccxYcPkK.o
+                0x0000000000000000        0x0 /tmp/cca2v1ii.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccu29tUM.o
+                0x0000000000000000        0x0 /tmp/cc3HWOoh.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/ccCTHlKJ.o
+                0x0000000000000000        0x0 /tmp/cctNYyxi.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/cch3YYhN.o
+                0x0000000000000000        0x0 /tmp/ccnnbv7e.o
  .note.GNU-stack
-                0x0000000000000000        0x0 /tmp/cc13wWQL.o
+                0x0000000000000000        0x0 /tmp/cc0SYpZf.o
 
 .riscv.attributes
                 0x0000000000000000       0x6c
  .riscv.attributes
-                0x0000000000000000       0x6c /tmp/ccxYcPkK.o
+                0x0000000000000000       0x6c /tmp/cca2v1ii.o
  .riscv.attributes
-                0x000000000000006c       0x68 /tmp/ccu29tUM.o
+                0x000000000000006c       0x68 /tmp/cc3HWOoh.o
  .riscv.attributes
-                0x00000000000000d4       0x68 /tmp/ccCTHlKJ.o
+                0x00000000000000d4       0x68 /tmp/cctNYyxi.o
  .riscv.attributes
-                0x000000000000013c       0x6c /tmp/cch3YYhN.o
+                0x000000000000013c       0x6c /tmp/ccnnbv7e.o
  .riscv.attributes
-                0x00000000000001a8       0x68 /tmp/cc13wWQL.o
+                0x00000000000001a8       0x68 /tmp/cc0SYpZf.o
  .riscv.attributes
-                0x0000000000000210       0x6a /tmp/ccQNtwfM.o
+                0x0000000000000210       0x6a /tmp/cc2rytig.o

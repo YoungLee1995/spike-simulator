@@ -300,8 +300,8 @@ public:
     uint32_t wgt_per_bloack_size : 8;
 
     bool is_gather_ld_act;
-    bool act_gather_index_addr : 24;
-    bool act_gather_index_len : 8;
+    uint32_t act_gather_index_addr : 24;
+    uint16_t act_gather_index_len : 8;
     uint64_t src_wgt_quant_zero_param_addr : 24;
 
     bool is_acc_square_sum;
@@ -1187,14 +1187,14 @@ public:
         kv_chunk_seq_dim = (data >> 40) & ((1UL << 10) - 1);
     }
 
-    void set_base11(uint64_t data)
+    void set_base111(uint64_t data)
     {
         kv_chunk_stride = (data >>= 0) & ((1UL << 32) - 1);
         kv_sliding_wd_size = (data >>= 32) & ((1UL << 16) - 1);
         kv_ring_ld_start_addr_indx = (data >>= 16) & ((1UL << 16) - 1);
     }
 
-    void set_base11(uint64_t data)
+    void set_base112(uint64_t data)
     {
         gather_inx_l1_addr = (data >>= 0) & ((1UL << 24) - 1);
         gather_inx_len = (data >>= 32) & ((1UL << 16) - 1);
@@ -1511,7 +1511,7 @@ public:
         l1_param_dst_addr = (data >>= 32) & ((1UL << 24) - 1);
     }
 
-    void set_base2(uint64_t data)
+    void set_base3(uint64_t data)
     {
         box_dim_k = data & ((1UL << 24) - 1);
         box_dim_m = (data >>= 32) & ((1UL << 16) - 1);

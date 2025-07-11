@@ -60,7 +60,7 @@ void sm_dispatch_t::dispatch(int idx)
     U64 tp0 = sp0 - 0x4000;
     p->get_state()->XPR.write(2, (reg_t)sp0);
     p->get_state()->XPR.write(4, (reg_t)tp0);
-    sm_log_info("Dispatch: core %x, PC = %lx, SP = %lx, TP = %lx",
+    sm_log_info("Dispatch: core %x, PC = %lx, SP = %llx, TP = %llx",
                 idx, p->get_state()->pc, sp0, tp0);
 }
 
