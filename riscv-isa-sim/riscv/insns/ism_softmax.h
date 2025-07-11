@@ -1,1 +1,1 @@
-sm_do_softmax(p, insn);
+// sm_do_softmax(p, insn);

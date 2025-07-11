@@ -341,7 +341,7 @@ void sim_t::step(size_t n)
     }
     for (size_t p = 1; p < procs.size(); p++)
     {
-      procs[p]->sm_main.tick(ncycle++);
+      // procs[p]->sm_main->tick(ncycle++);
     }
   }
   reg_t rtc_ticks=std::max(INTERLEAVE,n)/INSNS_PER_RTC_TICK;

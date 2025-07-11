@@ -3,6 +3,7 @@ spike_main_subproject_deps = \
 	fesvr \
 	softfloat \
 	smart\
+	smart_model\
 	disasm \
 	riscv \
 

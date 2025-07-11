@@ -1,1 +1,1 @@
-sm_do_vec_sfu(p, insn);
+// sm_do_vec_sfu(p, insn);

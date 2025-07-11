@@ -23,6 +23,7 @@ class sm_main_t
 
 public:
     sm_main_t(sim_t *sim);
+    int tick();
 };
 
 class sm_npucore_exit_t

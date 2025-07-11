@@ -1,1 +1,1 @@
-sm_do_dma_cp(p, insn);
+// sm_do_dma_cp(p, insn);

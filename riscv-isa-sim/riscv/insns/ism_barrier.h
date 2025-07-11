@@ -1,1 +1,1 @@
-sm_do_barrier(p,  insn);
+// sm_do_barrier(p,  insn);

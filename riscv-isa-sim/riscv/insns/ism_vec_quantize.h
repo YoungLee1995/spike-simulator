@@ -1,1 +1,1 @@
-sm_do_vec_quantize(p, insn);
+// sm_do_vec_quantize(p, insn);

@@ -1,1 +1,1 @@
-sm_do_vec_reduce(p, insn);
+// sm_do_vec_reduce(p, insn);

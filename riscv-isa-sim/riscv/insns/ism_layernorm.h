@@ -1,1 +1,1 @@
-sm_do_layernorm(p, insn);
+// sm_do_layernorm(p, insn);

@@ -4517,7 +4517,7 @@ DECLARE_INSN(ism_softmax      , MATCH_SM_SOFTMAX       , MASK_SM_SOFTMAX       )
 DECLARE_INSN(ism_vec_reduce   , MATCH_SM_VEC_REDUCE    , MASK_SM_VEC_REDUCE    )
 DECLARE_INSN(ism_vec_sfu      , MATCH_SM_VEC_SFU       , MASK_SM_VEC_SFU       )
 DECLARE_INSN(ism_vec_quantize , MATCH_SM_VEC_QUANTIZE  , MASK_SM_VEC_QUANTIZE  )
-DECLARE_INSN(ism_vec_elemwise , MATCH_SM_VEC_ELEMWISE  , MASK_SM_VEC_ELEMWISE  )
+DECLARE_INSN(ism_vec_elementwise , MATCH_SM_VEC_ELEMWISE  , MASK_SM_VEC_ELEMWISE  )
 DECLARE_INSN(ism_tensor       , MATCH_SM_TENSOR        , MASK_SM_TENSOR        )
 DECLARE_INSN(ism_tconv         , MATCH_SM_CONV          , MASK_SM_CONV          )
 #endif

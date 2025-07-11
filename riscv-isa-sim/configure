@@ -6924,7 +6924,7 @@ printf "%s\n" "$as_me: configuring default subproject : spike_main" >&6;}
       ac_config_files="$ac_config_files spike_main.mk:spike_main/spike_main.mk.in"
 
       enable_spike_main_sproj="yes"
-      subprojects_enabled="$subprojects_enabled smart_model"
+      subprojects_enabled="$subprojects_enabled spike_main"
 
 printf "%s\n" "#define SPIKE_MAIN_ENABLED /**/" >>confdefs.h
 

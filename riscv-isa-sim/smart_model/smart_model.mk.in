@@ -1,0 +1,9 @@
+smart_model_subproject_deps = softfloat
+
+smart_model_srcs = \
+
+smart_model_install_shared_lib = yes
+
+smart_model_test_srcs = 
+
+smart_model_install_hdrs = \

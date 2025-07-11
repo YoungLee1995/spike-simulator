@@ -56,7 +56,7 @@ void sm_dispatch_t::dispatch(int idx)
     p->sm_exit_code = 0;
     // for model debug
     // [TP, SP]: each 16k, for model test
-    U64 sp0 = SM_DDR_END - idx * 0x4000;
+    U64 sp0 = SM_DDR0_END - idx * 0x4000;
     U64 tp0 = sp0 - 0x4000;
     p->get_state()->XPR.write(2, (reg_t)sp0);
     p->get_state()->XPR.write(4, (reg_t)tp0);
