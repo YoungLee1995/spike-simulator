@@ -40,20 +40,15 @@ class sm_npucore_barrier_t
 {
 public:
     unsigned int Ecode;
-    sm_npucore_barrier_t(unsigned int ecode)
-    {
-        Ecode = ecode;
-    }
+    sm_npucore_barrier_t(){};
+   
 };
 
 class sm_npucore_full_t
 {
 public:
     unsigned int Ecode;
-    sm_npucore_full_t(unsigned int ecode)
-    {
-        Ecode = ecode;
-    }
+    sm_npucore_full_t(){};
 };
 
 

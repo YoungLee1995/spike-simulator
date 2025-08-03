@@ -1,1 +1,1 @@
-// sm_do_ddep_use(p, insn);
+sm_do_ddep_use(p, insn);

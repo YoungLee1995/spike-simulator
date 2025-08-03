@@ -1,1 +1,1 @@
-// sm_do_rmsnorm(p,  insn);
+sm_do_rmsnorm(p,  insn);

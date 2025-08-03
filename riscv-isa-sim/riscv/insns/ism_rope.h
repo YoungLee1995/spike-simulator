@@ -1,1 +1,1 @@
-// sm_do_rope(p, insn);
+sm_do_rope(p, insn);

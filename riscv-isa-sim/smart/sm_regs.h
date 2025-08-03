@@ -16,15 +16,15 @@
 #define SM_DDR1_BASE        0x800000000UL
 #define SM_DDR1_END         0xC00000000UL
 #define SM_DDR1_SIZE        (SM_DDR1_END - SM_DDR1_BASE) // 16GB
-#define SM_IS_DDR0(ADDR)    ((ADDR) >= SM_DDR0_BASE && (ADDR) <= SM_DDR0SM_DDR0_END_BASE)
-#define SM_IS_DDR1(ADDR)    ((ADDR) >= SM_DDR1_BASE && (ADDR) <= SM_DDR0SM_DDR1_END_BASE)
+#define SM_IS_DDR0(ADDR)    ((ADDR) >= SM_DDR0_BASE && (ADDR) <= SM_DDR0_END)
+#define SM_IS_DDR1(ADDR)    ((ADDR) >= SM_DDR1_BASE && (ADDR) <= SM_DDR1_END)
 
 #define SM_L1_BASE                  0x20100000000UL                                     
 #define SM_L1_NPU_BASE(Core)        (SM_L1_BASE + ((Core) * 0x2000000UL))
 #define SM_L1_NPU_SIZE              0x400000             
 #define SM_L1_NPU_END(Core)         (SM_L1_NPU_BASE(Core) + SM_L1_NPU_SIZE)              
 #define SM_NPU_END                  0x20140000000UL
-#define SM_IS_L1BUF(CORE, ADDR)     ((ADDR) >= SM_L1_NPU_BASE(Core) && (ADDR) <= SM_L1_NPU_END(Core))
+#define SM_IS_L1BUF(Core, ADDR)     ((ADDR) >= SM_L1_NPU_BASE(Core) && (ADDR) <= SM_L1_NPU_END(Core))
 
 #define SM_NPU_DBG_BASE 0XA4020000UL
 #define SM_NPU_DBG_END  0XA4030000UL

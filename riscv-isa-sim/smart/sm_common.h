@@ -184,6 +184,7 @@ struct tmm_insn_info_t
     bool pproc_en;
     bool is_remote_ld;
     bool fusion;
+    bool qk_quant_en;
 };
 
 struct ddep_gen_insn_info_t
@@ -546,7 +547,7 @@ public:
 
     bool pproc_y_scale_en;
 
-    bool pproc_y_relu_op : 2;
+    bool pproc_y_relu_op : 2; // 0:relu 1:relu6 2 leak relu 3 prelu
     bool pproc_y_sfu_op : 2;
     void reset()
     {
@@ -1241,226 +1242,334 @@ public:
     }
 };
 
+// copy
+namespace dma_cp_op
+{
+    enum
+    {
+        normal_transport,
+        tanspose,
+        depth2space,
+        space2depth,
+        ic_expand,
+        ic_padding,
+        premute,
+        contact,
+        layout_convert,
+        pack,
+        unpack,
+        split
+    };
+}
+
 class DMACPDesc
 {
 public:
     DMACPDesc() { reset(); }
 
     uint8_t dma_op : 4;
-    uint8_t space_block_size : 3;
-    uint8_t d2s_size : 4;
-    uint8_t ic_extend_times : 3;
-    uint8_t ic_origin_size : 4;
+    uint8_t d2s_block_size : 3;
+    uint8_t d2s_granu_size : 5;
+    uint8_t contact_dim : 2;
+    uint8_t pack_step : 4;
     uint8_t reshape_dim : 2;
-    uint8_t reshape_type : 2;
+    uint8_t permute_type : 3;
     uint8_t layout_convert_type : 2;
     uint8_t cp_direct : 2;
     bool is_ddr_l1buf;
     bool is_ddr_wgt;
-    uint8_t remote_code : 4;
+    uint8_t remote_code_id : 4;
     uint8_t dma_dtype : 3;
 
-    uint64_t l1_src_addr : 48;
-    uint64_t l1_dst_addr : 48;
+    uint64_t cp_tensor0_addr : 48;
+    uint64_t cp_tensor1_addr : 48;
+    uint64_t cp_tensor2_addr : 48;
 
-    uint32_t global_stride_0 : 24;
-    uint32_t global_stride_1 : 24;
-    uint32_t global_stride_2 : 24;
-    uint32_t global_stride_3 : 24;
+    uint32_t tensor0_global_stride_0 : 24;
+    uint32_t tensor0_global_stride_1 : 24;
+    uint32_t tensor0_global_stride_2 : 24;
+    uint32_t tensor0_global_stride_3 : 24;
 
-    uint32_t src_tile_dim_0 : 16;
-    uint32_t src_tile_dim_1 : 24;
-    uint32_t src_tile_dim_2 : 16;
-    uint32_t src_tile_dim_3 : 8;
+    uint32_t tensor1_global_stride_0 : 24;
+    uint32_t tensor1_global_stride_1 : 24;
+    uint32_t tensor1_global_stride_2 : 24;
+    uint32_t tensor1_global_stride_3 : 24;
 
-    uint32_t box_dim_0 : 16;
-    uint32_t box_dim_1 : 24;
-    uint32_t box_dim_2 : 16;
-    uint32_t box_dim_3 : 8;
+    uint32_t tensor2_global_stride_0 : 24;
+    uint32_t tensor2_global_stride_1 : 24;
+    uint32_t tensor2_global_stride_2 : 24;
+    uint32_t tensor2_global_stride_3 : 24;
 
-    uint32_t dst_tile_dim_0 : 16;
-    uint32_t dst_tile_dim_1 : 24;
-    uint32_t dst_tile_dim_2 : 16;
-    uint32_t dst_tile_dim_3 : 8;
+    uint32_t tensor0_box_dim_0 : 16;
+    uint32_t tensor0_box_dim_1 : 24;
+    uint32_t tensor0_box_dim_2 : 16;
+    uint32_t tensor0_box_dim_3 : 8;
 
-    uint32_t src_box_start_dim_0 : 16;
-    uint32_t src_box_start_dim_1 : 24;
-    uint32_t src_box_start_dim_2 : 16;
-    uint32_t src_box_start_dim_3 : 8;
+    uint32_t tensor1_box_dim_0 : 16;
+    uint32_t tensor1_box_dim_1 : 24;
+    uint32_t tensor1_box_dim_2 : 16;
+    uint32_t tensor1_box_dim_3 : 8;
 
-    uint32_t dst_box_start_dim_0 : 16;
-    uint32_t dst_box_start_dim_1 : 24;
-    uint32_t dst_box_start_dim_2 : 16;
-    uint32_t dst_box_start_dim_3 : 8;
+    uint32_t tensor2_box_dim_0 : 16;
+    uint32_t tensor2_box_dim_1 : 24;
+    uint32_t tensor2_box_dim_2 : 16;
+    uint32_t tensor2_box_dim_3 : 8;
+
+    uint32_t tensor0_box_start_0 : 16;
+    uint32_t tensor0_box_start_1 : 24;
+    uint32_t tensor0_box_start_2 : 16;
+    uint32_t tensor0_box_start_3 : 8;
+
+    uint32_t tensor1_box_start_0 : 16;
+    uint32_t tensor1_box_start_1 : 24;
+    uint32_t tensor1_box_start_2 : 16;
+    uint32_t tensor1_box_start_3 : 8;
+
+    uint32_t tensor2_box_start_0 : 16;
+    uint32_t tensor2_box_start_1 : 24;
+    uint32_t tensor2_box_start_2 : 16;
+    uint32_t tensor2_box_start_3 : 8;
 
     void reset()
     {
-        // DMA 控制字段
         dma_op = 0;
-        space_block_size = 0;
-        d2s_size = 0;
-        ic_extend_times = 0;
-        ic_origin_size = 0;
+        d2s_block_size = 0;
+        d2s_granu_size = 0;
+        contact_dim = 0;
+        pack_step = 0;
         reshape_dim = 0;
-        reshape_type = 0;
+        permute_type = 0;
         layout_convert_type = 0;
         cp_direct = 0;
         is_ddr_l1buf = false;
         is_ddr_wgt = false;
-        remote_code = 0;
+        remote_code_id = 0;
         dma_dtype = 0;
 
-        // 地址字段
-        l1_src_addr = 0;
-        l1_dst_addr = 0;
+        cp_tensor0_addr = 0;
+        cp_tensor1_addr = 0;
+        cp_tensor2_addr = 0;
 
-        // 全局步长
-        global_stride_0 = 0;
-        global_stride_1 = 0;
-        global_stride_2 = 0;
-        global_stride_3 = 0;
+        tensor0_global_stride_0 = 0;
+        tensor0_global_stride_1 = 0;
+        tensor0_global_stride_2 = 0;
+        tensor0_global_stride_3 = 0;
 
-        // 源 tile 维度
-        src_tile_dim_0 = 0;
-        src_tile_dim_1 = 0;
-        src_tile_dim_2 = 0;
-        src_tile_dim_3 = 0;
+        tensor1_global_stride_0 = 0;
+        tensor1_global_stride_1 = 0;
+        tensor1_global_stride_2 = 0;
+        tensor1_global_stride_3 = 0;
 
-        // box 维度
-        box_dim_0 = 0;
-        box_dim_1 = 0;
-        box_dim_2 = 0;
-        box_dim_3 = 0;
+        tensor2_global_stride_0 = 0;
+        tensor2_global_stride_1 = 0;
+        tensor2_global_stride_2 = 0;
+        tensor2_global_stride_3 = 0;
 
-        // 目标 tile 维度
-        dst_tile_dim_0 = 0;
-        dst_tile_dim_1 = 0;
-        dst_tile_dim_2 = 0;
-        dst_tile_dim_3 = 0;
+        tensor0_box_dim_0 = 0;
+        tensor0_box_dim_1 = 0;
+        tensor0_box_dim_2 = 0;
+        tensor0_box_dim_3 = 0;
 
-        // 源 box 起始维度
-        src_box_start_dim_0 = 0;
-        src_box_start_dim_1 = 0;
-        src_box_start_dim_2 = 0;
-        src_box_start_dim_3 = 0;
+        tensor1_box_dim_0 = 0;
+        tensor1_box_dim_1 = 0;
+        tensor1_box_dim_2 = 0;
+        tensor1_box_dim_3 = 0;
 
-        // 目标 box 起始维度
-        dst_box_start_dim_0 = 0;
-        dst_box_start_dim_1 = 0;
-        dst_box_start_dim_2 = 0;
-        dst_box_start_dim_3 = 0;
+        tensor2_box_dim_0 = 0;
+        tensor2_box_dim_1 = 0;
+        tensor2_box_dim_2 = 0;
+        tensor2_box_dim_3 = 0;
+
+        tensor0_box_start_0 = 0;
+        tensor0_box_start_1 = 0;
+        tensor0_box_start_2 = 0;
+        tensor0_box_start_3 = 0;
+
+        tensor1_box_start_0 = 0;
+        tensor1_box_start_1 = 0;
+        tensor1_box_start_2 = 0;
+        tensor1_box_start_3 = 0;
+
+        tensor2_box_start_0 = 0;
+        tensor2_box_start_1 = 0;
+        tensor2_box_start_2 = 0;
+        tensor2_box_start_3 = 0;
     }
 
     void set_base0(uint64_t data)
     {
-        dma_op = (data >>= 0) & 0xf;
-        space_block_size = (data >>= 8) & 0x7;
-        d2s_size = (data >>= 4) & 0xf;
-        ic_extend_times = (data >>= 4) & 0x7;
-        ic_origin_size = (data >>= 8) & 0xf;
-        reshape_dim = (data >>= 8) & 0x3;
-        reshape_type = (data >>= 8) & 0x3;
-        layout_convert_type = (data >>= 8) & 0x3;
-        cp_direct = (data >>= 4) & 0x3;
-        is_ddr_l1buf = (data >>= 2) & 0x1;
-        is_ddr_wgt = (data >>= 1) & 0x1;
-        remote_code = (data >>= 1) & 0xf;
-        dma_dtype = (data >>= 4) & 0x7;
+        dma_op = (data >>= 0) & 0xf;              // bits [3:0]
+        d2s_block_size = (data >>= 4) & 0x7;      // bits [6:4]
+        d2s_granu_size = (data >>= 3) & 0x1f;     // bits [11:7]
+        contact_dim = (data >>= 5) & 0x3;         // bits [13:12]
+        pack_step = (data >>= 2) & 0xf;           // bits [17:14]
+        reshape_dim = (data >>= 4) & 0x3;         // bits [19:18]
+        permute_type = (data >>= 2) & 0x7;        // bits [22:20]
+        layout_convert_type = (data >>= 3) & 0x3; // bits [24:23]
+        cp_direct = (data >>= 2) & 0x3;           // bits [26:25]
+        is_ddr_l1buf = (data >>= 1) & 0x1;        // bit 27
+        is_ddr_wgt = (data >>= 1) & 0x1;          // bit 28
+        remote_code_id = (data >>= 1) & 0xf;      // bits [32:29]
+        dma_dtype = (data >>= 4) & 0x7;           // bits [35:33]
     }
 
-    void set_base1(uint64_t data)
-    {
-        l1_src_addr = data & ((1UL << 48) - 1);
-    }
-
-    void set_base2(uint64_t data)
-    {
-        l1_dst_addr = data & ((1UL << 48) - 1);
-    }
-
-    void set_base3(uint64_t data)
-    {
-        global_stride_0 = data & ((1UL << 24) - 1);
-        global_stride_1 = (data >>= 32) & ((1UL << 24) - 1);
-    }
+    void set_base1(uint64_t data) { cp_tensor0_addr = data & ((1UL << 48) - 1); }
+    void set_base2(uint64_t data) { cp_tensor1_addr = data & ((1UL << 48) - 1); }
+    void set_base3(uint64_t data) { cp_tensor2_addr = data & ((1UL << 48) - 1); }
 
     void set_base4(uint64_t data)
     {
-        global_stride_2 = data & ((1UL << 24) - 1);
-        global_stride_3 = (data >>= 32) & ((1UL << 24) - 1);
+        tensor0_global_stride_0 = data & ((1UL << 24) - 1);
+        tensor0_global_stride_1 = (data >>= 32) & ((1UL << 24) - 1);
     }
 
+    // set_base5: tensor0_global_stride_2, tensor0_global_stride_3
     void set_base5(uint64_t data)
     {
-        src_tile_dim_0 = (data >>= 00) & ((1UL << 16) - 1);
-        src_tile_dim_1 = (data >>= 16) & ((1UL << 24) - 1);
-        src_tile_dim_1 = (data >>= 24) & ((1UL << 16) - 1);
-        src_tile_dim_1 = (data >>= 16) & ((1UL << 8) - 1);
+        tensor0_global_stride_2 = data & ((1UL << 24) - 1);
+        tensor0_global_stride_3 = (data >> 32) & ((1UL << 24) - 1);
     }
 
+    // set_base6: tensor1_global_stride_0, tensor1_global_stride_1
     void set_base6(uint64_t data)
     {
-        box_dim_0 = (data >>= 00) & ((1UL << 16) - 1);
-        box_dim_1 = (data >>= 16) & ((1UL << 24) - 1);
-        box_dim_1 = (data >>= 24) & ((1UL << 16) - 1);
-        box_dim_1 = (data >>= 16) & ((1UL << 8) - 1);
+        tensor1_global_stride_0 = data & ((1UL << 24) - 1);
+        tensor1_global_stride_1 = (data >> 32) & ((1UL << 24) - 1);
     }
 
+    // set_base7: tensor1_global_stride_2, tensor1_global_stride_3
     void set_base7(uint64_t data)
     {
-        dst_tile_dim_0 = (data >>= 00) & ((1UL << 16) - 1);
-        dst_tile_dim_1 = (data >>= 16) & ((1UL << 24) - 1);
-        dst_tile_dim_1 = (data >>= 24) & ((1UL << 16) - 1);
-        dst_tile_dim_1 = (data >>= 16) & ((1UL << 8) - 1);
+        tensor1_global_stride_2 = data & ((1UL << 24) - 1);
+        tensor1_global_stride_3 = (data >> 32) & ((1UL << 24) - 1);
     }
 
+    // set_base8: tensor2_global_stride_0, tensor2_global_stride_1
     void set_base8(uint64_t data)
     {
-        src_box_start_dim_0 = (data >>= 00) & ((1UL << 16) - 1);
-        src_box_start_dim_1 = (data >>= 16) & ((1UL << 24) - 1);
-        src_box_start_dim_1 = (data >>= 24) & ((1UL << 16) - 1);
-        src_box_start_dim_1 = (data >>= 16) & ((1UL << 8) - 1);
+        tensor2_global_stride_0 = data & ((1UL << 24) - 1);
+        tensor2_global_stride_1 = (data >> 32) & ((1UL << 24) - 1);
     }
 
+    // set_base9: tensor2_global_stride_2, tensor2_global_stride_3
     void set_base9(uint64_t data)
     {
-        dst_box_start_dim_0 = (data >>= 00) & ((1UL << 16) - 1);
-        dst_box_start_dim_1 = (data >>= 16) & ((1UL << 24) - 1);
-        dst_box_start_dim_1 = (data >>= 24) & ((1UL << 16) - 1);
-        dst_box_start_dim_1 = (data >>= 16) & ((1UL << 8) - 1);
+        tensor2_global_stride_2 = data & ((1UL << 24) - 1);
+        tensor2_global_stride_3 = (data >> 32) & ((1UL << 24) - 1);
+    }
+
+    // set_base10: tensor0_box_dim_0, tensor0_box_dim_1, tensor0_box_dim_2, tensor0_box_dim_3
+    void set_base10(uint64_t data0)
+    {
+        tensor0_box_dim_0 = data0 & 0xFFFF;
+        tensor0_box_dim_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor0_box_dim_2 = (data0 >> 40) & 0xFFFF;
+        tensor0_box_dim_3 = (data0 >> 56 >> 16) & 0xFF;
+    }
+
+    // set_base11: tensor1_box_dim_0, tensor1_box_dim_1, tensor1_box_dim_2, tensor1_box_dim_3
+    void set_base11(uint64_t data0)
+    {
+        tensor1_box_dim_0 = data0 & 0xFFFF;
+        tensor1_box_dim_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor1_box_dim_2 = (data0 >> 40) & 0xFFFF;
+        tensor1_box_dim_3 = (data0 >> 56 >> 16) & 0xFF;
+    }
+
+    // set_base12: tensor2_box_dim_0, tensor2_box_dim_1, tensor2_box_dim_2, tensor2_box_dim_3
+    void set_base12(uint64_t data0)
+    {
+        tensor2_box_dim_0 = data0 & 0xFFFF;
+        tensor2_box_dim_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor2_box_dim_2 = (data0 >> 40) & 0xFFFF;
+        tensor2_box_dim_3 = (data0 >> 56 >> 16) & 0xFF;
+    }
+
+    // set_base13: tensor0_box_start_0, tensor0_box_start_1, tensor0_box_start_2, tensor0_box_start_3
+    void set_base13(uint64_t data0)
+    {
+        tensor0_box_start_0 = data0 & 0xFFFF;
+        tensor0_box_start_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor0_box_start_2 = (data0 >> 40) & 0xFFFF;
+        tensor0_box_start_3 = (data0 >> 56 >> 16) & 0xFF;
+    }
+
+    // set_base14: tensor1_box_start_0, tensor1_box_start_1, tensor1_box_start_2, tensor1_box_start_3
+    void set_base14(uint64_t data0)
+    {
+        tensor1_box_start_0 = data0 & 0xFFFF;
+        tensor1_box_start_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor1_box_start_2 = (data0 >> 40) & 0xFFFF;
+        tensor1_box_start_3 = (data0 >> 56 >> 16) & 0xFF;
+    }
+
+    // set_base15: tensor2_box_start_0, tensor2_box_start_1, tensor2_box_start_2, tensor2_box_start_3
+    void set_base15(uint64_t data0)
+    {
+        tensor2_box_start_0 = data0 & 0xFFFF;
+        tensor2_box_start_1 = (data0 >> 16) & 0xFFFFFF;
+        tensor2_box_start_2 = (data0 >> 40) & 0xFFFF;
+        tensor2_box_start_3 = (data0 >> 56 >> 16) & 0xFF;
     }
 
     void print_info() const
     {
         sm_log_info(
             "DMACPDesc <"
-            // DMA控制字段
-            "ctrl[dma_op:%u space_blk:%u d2s:%u ic_ext:%u ic_org:%u] | "
-            "reshape[dim:%u type:%u layout:%u] | "
-            "dir:%u ddr[l1buf:%d wgt:%d] remote:0x%x dtype:%u | "
-            // 地址信息
-            "addr[src:0x%012lx dst:0x%012lx] | "
-            // 全局步长
-            "g_stride[0:%u 1:%u 2:%u 3:%u] | "
-            // 维度信息
-            "src_tile[0:%u 1:%u 2:%u 3:%u] | "
-            "box[0:%u 1:%u 2:%u 3:%u] | "
-            "dst_tile[0:%u 1:%u 2:%u 3:%u] | "
-            // 起始坐标
-            "src_start[0:%u 1:%u 2:%u 3:%u] | "
-            "dst_start[0:%u 1:%u 2:%u 3:%u]>",
-            dma_op, space_block_size, d2s_size, ic_extend_times, ic_origin_size,
-            reshape_dim, reshape_type, layout_convert_type,
-            cp_direct, is_ddr_l1buf, is_ddr_wgt, remote_code, dma_dtype,
-            l1_src_addr, l1_dst_addr,
-            global_stride_0, global_stride_1, global_stride_2, global_stride_3,
-            src_tile_dim_0, src_tile_dim_1, src_tile_dim_2, src_tile_dim_3,
-            box_dim_0, box_dim_1, box_dim_2, box_dim_3,
-            dst_tile_dim_0, dst_tile_dim_1, dst_tile_dim_2, dst_tile_dim_3,
-            src_box_start_dim_0, src_box_start_dim_1,
-            src_box_start_dim_2, src_box_start_dim_3,
-            dst_box_start_dim_0, dst_box_start_dim_1,
-            dst_box_start_dim_2, dst_box_start_dim_3);
+            // 控制字段
+            "ctrl[op:%u blk:%u d2s:%u contact:%u step:%u reshape:%u permute:%u layout:%u dir:%u] "
+            "flags[l1buf:%d wgt:%d remote:0x%x dtype:%u] | "
+
+            // 地址字段
+            "addr[t0:0x%012llx t1:0x%012llx t2:0x%012llx] | "
+
+            // global stride
+            "stride0[%u %u %u %u] "
+            "stride1[%u %u %u %u] "
+            "stride2[%u %u %u %u] | "
+
+            // box dims
+            "box0[%u %u %u %u] "
+            "box1[%u %u %u %u] "
+            "box2[%u %u %u %u] | "
+
+            // box starts
+            "start0[%u %u %u %u] "
+            "start1[%u %u %u %u] "
+            "start2[%u %u %u %u]"
+            " >",
+
+            // 控制字段
+            dma_op, d2s_block_size, d2s_granu_size, contact_dim, pack_step,
+            reshape_dim, permute_type, layout_convert_type, cp_direct,
+            is_ddr_l1buf, is_ddr_wgt, remote_code_id, dma_dtype,
+
+            // 地址
+            cp_tensor0_addr, cp_tensor1_addr, cp_tensor2_addr,
+
+            // strides
+            tensor0_global_stride_0, tensor0_global_stride_1,
+            tensor0_global_stride_2, tensor0_global_stride_3,
+            tensor1_global_stride_0, tensor1_global_stride_1,
+            tensor1_global_stride_2, tensor1_global_stride_3,
+            tensor2_global_stride_0, tensor2_global_stride_1,
+            tensor2_global_stride_2, tensor2_global_stride_3,
+
+            // box dims
+            tensor0_box_dim_0, tensor0_box_dim_1,
+            tensor0_box_dim_2, tensor0_box_dim_3,
+            tensor1_box_dim_0, tensor1_box_dim_1,
+            tensor1_box_dim_2, tensor1_box_dim_3,
+            tensor2_box_dim_0, tensor2_box_dim_1,
+            tensor2_box_dim_2, tensor2_box_dim_3,
+
+            // box starts
+            tensor0_box_start_0, tensor0_box_start_1,
+            tensor0_box_start_2, tensor0_box_start_3,
+            tensor1_box_start_0, tensor1_box_start_1,
+            tensor1_box_start_2, tensor1_box_start_3,
+            tensor2_box_start_0, tensor2_box_start_1,
+            tensor2_box_start_2, tensor2_box_start_3);
     }
 };
 

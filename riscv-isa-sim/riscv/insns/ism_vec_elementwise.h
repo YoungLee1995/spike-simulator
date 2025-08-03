@@ -1,1 +1,1 @@
-// sm_do_vec_elementwise(p, insn);
+sm_do_vec_elementwise(p, insn);

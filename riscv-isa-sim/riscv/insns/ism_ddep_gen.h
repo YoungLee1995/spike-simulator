@@ -1,1 +1,1 @@
-// sm_do_ddep_gen(p, insn);
+sm_do_ddep_gen(p, insn);
