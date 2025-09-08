@@ -227,6 +227,33 @@ struct ddep_rls_insn_info_t
     }
 };
 
+struct barrier_insn_info_t
+{
+    uint32_t cmd_type;
+    uint32_t barrier_id;
+    bool main_flag;
+    uint32_t core_num;
+    uint32_t dst_chip_id;
+    uint32_t chip_num;
+    bool intra;
+
+    void print() const
+    {
+        sm_log_info("BARRIER <cmd_type:%u, barrier_id:%u, main_flag:%u, core_num:%u, dst_chip_id:%u, chip_num:%u, intra:%u>", cmd_type, barrier_id, main_flag, core_num, dst_chip_id, chip_num, intra);
+    }
+};
+
+struct fence__insn_info_t
+{
+    uint32_t rs1;
+    uint32_t rd;
+
+    void print() const
+    {
+        sm_log_info("FENCE <rs1:%u, rd:%u>", rs1, rd);
+    }
+};
+
 // fp16 to fp32 func
 typedef unsigned short Half;
 typedef unsigned short ushort;

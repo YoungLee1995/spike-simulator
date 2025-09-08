@@ -4,6 +4,7 @@
 #define _sm_barrier_h_
 #include <vector>
 #include "sm_regs.h"
+#include "sm_common.h"
 
 class processor_t;
 
@@ -20,7 +21,7 @@ class sm_barrier_t
 
 public:
     sm_barrier_t() {}
-    int barrier(processor_t *p, int barrier_id, int sync_num);
+    int barrier(processor_t *p, barrier_insn_info_t info);
 };
 
 #endif
