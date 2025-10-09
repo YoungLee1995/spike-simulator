@@ -26,7 +26,7 @@ template <typename T>
 void assert_empty(const std::queue<T> &q)
 {
     if (empty(q))
-        throw std::runtime_error("Queue is empty");
+        throw out_of_range("Queue is empty");
 }
 
 template <typename T>

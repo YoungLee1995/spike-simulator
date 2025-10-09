@@ -2,6 +2,7 @@
  */
 #ifndef _smart_h
 #define _smart_h
+#include "sm_regs.h"
 
 class sim_t;
 class mem_t;
@@ -22,6 +23,8 @@ class sm_main_t
     sm_file_t *File;
 
 public:
+    sm_npu_t *Npu[SM_NPU_CORES];
+
     sm_main_t(sim_t *sim);
     int tick();
 };

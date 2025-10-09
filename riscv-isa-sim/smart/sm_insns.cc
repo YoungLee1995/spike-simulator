@@ -5,11 +5,30 @@
 #include "sm_barrier.h"
 #include "sm_common.h"
 #include "sm_ref_rmsnorm.h"
+#include "sm_fence.h"
 #include "smart.h"
 #include "assert.h"
 
+//Sync
+static int barrier_get_params(insn_t insn, barrier_insn_info_t &info);
+{
+    info.barrier_id = insn.x(15, 5);
+    info.core_num = insn.x(20, 3);
+    info.dst_chip_id = insn.x(7,4);
+    info.main_flag = insn.x(11,1);
+    info.chip_num = insn.x(23,4);
+    info.cmd_type = insn.x(28,2);
+    info.intra = insn.x(27,1);
+    return 0;
+}
+
 int sm_do_barrier(processor_t *p, insn_t insn)
 {
+    p->sm_scheduler->assure_empty();
+    BARRIER_Info info{new barrier_insn_info_t};
+    barrier_get_params(insn, *info);
+    p->sm_main->Barrier-> barrier(p,info);
+
     return 0;
 }
 

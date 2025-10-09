@@ -107,6 +107,16 @@ public:
     }
 };
 
+struct fence_insn_info_t{
+    int rs1;
+    int rd;
+
+    void print() const
+    {
+        sm_log_info("FENCE <rs1:%d, rd:%d>", rs1, rd);
+    }
+};
+
 struct llm_insn_info_t
 {
     unsigned data_type;
@@ -1721,5 +1731,16 @@ typedef unique_ptr<TCONVDesc> CONV_Desc;
 typedef unique_ptr<ddep_gen_insn_info_t> DDEP_Gen_Info;
 typedef unique_ptr<ddep_use_insn_info_t> DDEP_Use_Info;
 typedef unique_ptr<ddep_rls_insn_info_t> DDEP_Rls_Info;
+
+typedef unique_ptr<barrier_insn_info_t> BARRIER_Info;
+
+struct paraInputCmodel{
+    uint16_t *src_data;
+    uint16_t *src_data_q;
+    uint16_t *gamma;
+    uint16_t *k_mean;
+    uint16_t *maskPattern;
+    
+}
 
 #endif

@@ -27,7 +27,12 @@ typedef enum
     sm_layout_type_org,
     sm_layout_type_activate,
     sm_layout_type_weight,
-    sm_layout_type_param
+    sm_layout_type_param,
+    sm_wgtscale_pergroup,
+    sm_wgtscale_perblock,
+    sm_actscale_pergroup,
+    sm_elw
+
 } sm_layout_type_t;
 
 struct sm_box_t
@@ -42,15 +47,15 @@ struct sm_box_t
     uint32_t tile_dims[4];
     uint32_t box_offset[4];
 
-    bool rdwr_conv(simif_t *simif, uint8_t *bytes, bool bStore);
-
-    bool read_mat_k(simif_t *simif, int midx, uint8_t *bytes);
+    bool read_mat_k(simif_t *simif, int midx, uint8_t *bytes); // activatr: row, weight: col, [H,W]: row
     bool read_mat_m_32(simif_t *simif, int kslice, uint8_t *bytes);
     bool read_mat_ic_32(simif_t *simif, int batchid, int cslice, int hid, uint8_t *bytes);
     bool read_mat(simif_t *simif, uint8_t *bytes);
     bool read_mat_T(simif_t *simif, uint8_t *bytes);
     bool read_wgt_raw(simif_t *simif, uint8_t *bytes);
     bool read_conv(simif_t *simif, uint8_t *bytes) { return rdwr_conv(simif, bytes, false); }
+    bool read_mat_for_matmul(simif_t *simif, uint8_t *bytes);
+    bool mat_layout_convert(uint8_t *src, uint8_t *dst);
 
     bool write_mat_k(simif_t *simif, int midx, uint8_t *bytes);
     bool write_mat_m_32(simif_t *simif, int kslice, uint8_t *bytes);
@@ -62,6 +67,8 @@ struct sm_box_t
 
     bool in_addr() { return (SM_IS_DDR0(Addr) || SM_IS_DDR1(Addr)); }
     bool is_l1buf(uint32_t id = 0) { return SM_IS_L1BUF(id, Addr); }
+
+    bool rdwr_conv(simif_t *simif, uint8_t *bytes, bool bStore);
 
     int get_box_bytes()
     {
@@ -204,5 +211,7 @@ bool sm_get_tmm_dstbox(tmm_insn_info_t *info, TSMATMULDesc *desc, sm_box_t &dbox
 bool sm_get_elw_box(tmm_insn_info_t *info, ELWDesc *desc, sm_box_t &dbox, uint32_t id = 0);
 bool sm_get_tconv_srcbox(tmm_insn_info_t *info, TCONVDesc *desc, sm_box_t &dbox, sm_layout_type_t type, uint32_t id = 0);
 bool sm_get_tconv_dstbox(tmm_insn_info_t *info, TCONVDesc *desc, sm_box_t &dbox, uint32_t id = 0);
+bool sm_get_tmm_scalebox(tmm_insn_info_t *info, TSMATMULDesc *desc, sm_box_t &box, sm_layout_type_t type, uint32_t id = 0);
+bool sm_get_elw_srcbox(ELWDesc *desc, sm_box_t &box, uint32_t id = 0);
 
 #endif

@@ -14,7 +14,7 @@
 #include "sm_log.h"
 #include "sm_dispatch.h"
 
-sm_dispatch_t::sm_dispatch_t(sim_t *sim)
+sm_dispatch_t::sm_dispatch_t(sim_t *sim, sm_main_t *sm_main)
 {
     Sim = sim;
 
@@ -24,6 +24,7 @@ sm_dispatch_t::sm_dispatch_t(sim_t *sim)
         processor_t *proc = sim->get_harts().at(c);
         Cores[i] = proc;
         // set core scheduler state
+        proc->sm_main = sm_main;
         proc->sm_sched_suspend = 1;
         proc->sm_dispatch_finish = [this, i](processor_t *p)
         {
@@ -39,7 +40,7 @@ sm_dispatch_t::sm_dispatch_t(sim_t *sim)
             {
                 sm_log_info("Dispatch: Core%x exit, exit_code = %x", i, Exit_codes[i]);
             }
-            sm_log_info("Dispatch: core %x finished, exit code = %x", i, Exit_codes[i]);
+            // sm_log_info("Dispatch: core %x finished, exit code = %x", i, Exit_codes[i]);
         };
     }
 }

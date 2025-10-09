@@ -14,6 +14,17 @@ sm_file_t::sm_file_t(simif_t *simif)
     Simif = simif;
 }
 
+sm_file_t::~sm_file_t()
+{
+    if (Simif)
+        delete Simif;
+    op = 0;
+    out = 0;
+    in1 = 0;
+    in2 = 0;
+    in3 = 0;
+}
+
 bool sm_file_t::load(reg_t addr, size_t len, uint8_t *bytes)
 {
     U64 *p = (U64 *)bytes;

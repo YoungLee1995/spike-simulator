@@ -6,33 +6,28 @@
 #include <cctype>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
+using namespace std;
 
-class sm_config_t
+class sm_config
 {
 public:
-    sm_config_t(const std::string &file_path = "sm_system.cfg");
-    ~sm_config_t() = default;
+    sm_config(const std::string &file_path = "sm_system.cfg") : m_cfg_file(file_path) {}
+    ~sm_config() {}
 
-    std::string getPath() const;
-    
+    std::string getPath() { return m_cfg_file; }
+
+    string removeComments(const string &line);
+
     // 基础类型匹配函数（带默认值）
-    void match(const std::string &para, int &value, int default_value = 0);
-    void match(const std::string &para, int64_t &value, int64_t default_value = 0);
-    void match(const std::string &para, bool &value, bool default_value = false);
-    void match(const std::string &para, std::string &value, const std::string &default_value = "");
-    
-    // 新增：获取值而不是通过引用设置
-    int getInt(const std::string &para, int default_value = 0);
-    int64_t getInt64(const std::string &para, int64_t default_value = 0);
-    bool getBool(const std::string &para, bool default_value = false);
-    std::string getString(const std::string &para, const std::string &default_value = "");
-    
-    // 新增：检查参数是否存在
-    bool hasKey(const std::string &para);
-    
+    void match(const std::string &para, int &value);
+    void match(const std::string &para, int64_t &value);
+    void match(const std::string &para, bool &value);
+    void match(const std::string &para, std::string &value);
+
     // 工具函数
     static std::vector<std::string> splitString(const std::string &s, char delim);
     static bool isDigitString(const std::string &s);
@@ -43,9 +38,6 @@ public:
 
 private:
     std::string m_cfg_file;
-    
-    // 内部读取函数
-    std::string readValue(const std::string &para, const std::string &default_value = "");
 };
 
 #endif // _SM_CONFIG_H_

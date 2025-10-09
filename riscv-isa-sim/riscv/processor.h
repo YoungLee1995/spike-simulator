@@ -440,11 +440,14 @@ public:
   triggers::module_t TM;
 
 
+  bool sm_dev_idle=0;
+  bool sm_npu_wfi=0;
+
   bool sm_sched_suspend=0;
   uint32_t sm_exit_code;
   std::function<void(processor_t*)> sm_dispatch_finish;
-  sm_main_t *sm_main;
-  sm_schedule_t *sm_scheduler;
+  sm_main_t *sm_main=nullptr;
+  sm_schedule_t *sm_scheduler=nullptr;
 };
 
 #endif
