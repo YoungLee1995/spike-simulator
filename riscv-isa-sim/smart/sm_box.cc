@@ -464,7 +464,7 @@ bool sm_get_llm_box(llm_insn_info_t *info, LLMDesc *desc, sm_box_t &sbox, sm_box
     return true;
 }
 
-bool sm_get_dma_ls_box(dma_insn_info_t *info, DMALSDesc *desc, sm_box_t &sbox, sm_box_t &dbox, uint32_t id, uint8_t src_mode, uint8_t dst_mode)
+bool sm_get_dma_ls_box(dma_insn_info_t *info, DMA_LS_Desc *desc, sm_box_t &sbox, sm_box_t &dbox, uint32_t id, uint8_t src_mode, uint8_t dst_mode)
 {
     sbox.Type = info->mat_type == 0 ? sm_data_type_matrix : sm_data_type_conv;
     sbox.Layout = info->data_type == 0 ? sm_layout_type_weight : (info->data_type == 1 && info->op == 1 ? sm_layout_type_activate : sm_layout_type_org);
@@ -513,7 +513,7 @@ bool sm_get_dma_ls_box(dma_insn_info_t *info, DMALSDesc *desc, sm_box_t &sbox, s
     return true;
 }
 
-bool sm_get_dma_cp_box(dma_insn_info_t *info, DMACPDesc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id, uint8_t src_mode, uint8_t dst_mode)
+bool sm_get_dma_cp_box(dma_insn_info_t *info, DMA_CP_Desc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id, uint8_t src_mode, uint8_t dst_mode)
 {
     sboc.Type = info->mat_type == 0 ? sm_data_type_matrix : sm_data_type_conv;
     sboc.Layout = info->data_type == 0 ? sm_layout_type_weight : (info->data_type == 1 ? sm_layout_type_activate : sm_layout_type_param);

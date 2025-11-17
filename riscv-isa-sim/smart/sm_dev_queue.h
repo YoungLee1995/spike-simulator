@@ -9,7 +9,7 @@
 #include <variant>
 
 using TSTuple = tuple<dsa_ops_t, TMM_INFO, MUL_Desc, CONV_Desc, PROC_Desc, ELW_Desc>;
-using DMATuple = tuple<dsa_ops_t, DMA_INFO, DMALSDesc, DMACPDesc>;
+using DMATuple = tuple<dsa_ops_t, DMA_INFO, DMA_LS_Desc, DMA_CP_Desc>;
 using LLMTuple = tuple<dsa_ops_t, LLM_INFO, LLM_Desc>;
 using TSElwType = std::variant<DDEP_Rls_Info, DDEP_Use_Info, TSTuple>;
 using DMAElwType = std::variant<DDEP_Rls_Info, DDEP_Use_Info, DMATuple>;

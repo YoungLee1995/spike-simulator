@@ -1028,10 +1028,10 @@ public:
     }
 };
 
-class DMALSDesc
+class DMA_LS_Desc
 {
 public:
-    DMALSDesc() { reset(); }
+    DMA_LS_Desc() { reset(); }
 
     uint8_t dma_op : 4;
     uint8_t space_block_size : 3;
@@ -1299,10 +1299,10 @@ namespace dma_cp_op
     };
 }
 
-class DMACPDesc
+class DMA_CP_Desc
 {
 public:
-    DMACPDesc() { reset(); }
+    DMA_CP_Desc() { reset(); }
 
     uint8_t dma_op : 4;
     uint8_t d2s_block_size : 3;
@@ -1719,8 +1719,8 @@ typedef enum
 typedef unique_ptr<llm_insn_info_t> LLM_INFO;
 typedef unique_ptr<LLMDesc> LLM_Desc;
 typedef unique_ptr<dma_insn_info_t> DMA_INFO;
-typedef unique_ptr<DMALSDesc> DMA_Ls_Desc;
-typedef unique_ptr<DMACPDesc> DMA_Cp_Desc;
+typedef unique_ptr<DMA_LS_Desc> DMA_Ls_Desc;
+typedef unique_ptr<DMA_CP_Desc> DMA_Cp_Desc;
 
 typedef unique_ptr<tmm_insn_info_t> TMM_INFO;
 typedef unique_ptr<TSMATMULDesc> MUL_Desc;

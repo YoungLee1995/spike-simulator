@@ -204,8 +204,8 @@ struct sm_box_t
 
 uint16_t pad_box_m(uint16_t m);
 bool sm_get_llm_box(llm_insn_info_t *info, LLMDesc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id = 0, uint8_t src_mode = 0, uint8_t dst_mode = 0);
-bool sm_get_dma_ls_box(dma_insn_info_t *info, DMALSDesc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id = 0, uint8_t src_mode = 0, uint8_t dst_mode = 0);
-bool sm_get_dma_cp_box(dma_insn_info_t *info, DMACPDesc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id = 0, uint8_t src_mode = 0, uint8_t dst_mode = 0);
+bool sm_get_dma_ls_box(dma_insn_info_t *info, DMA_LS_Desc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id = 0, uint8_t src_mode = 0, uint8_t dst_mode = 0);
+bool sm_get_dma_cp_box(dma_insn_info_t *info, DMA_CP_Desc *desc, sm_box_t &sboc, sm_box_t &dbox, uint32_t id = 0, uint8_t src_mode = 0, uint8_t dst_mode = 0);
 bool sm_get_tmm_srcbox(tmm_insn_info_t *info, TSMATMULDesc *desc, sm_box_t &dbox, sm_layout_type_t type, uint32_t id = 0);
 bool sm_get_tmm_dstbox(tmm_insn_info_t *info, TSMATMULDesc *desc, sm_box_t &dbox, uint32_t id = 0);
 bool sm_get_elw_box(tmm_insn_info_t *info, ELWDesc *desc, sm_box_t &dbox, uint32_t id = 0);
